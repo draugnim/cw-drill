@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CW copy drill</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;500;600;700;800&family=Onest:wght@600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="icon" type="image/svg+xml" href="./img/logo.svg">
-<link rel="stylesheet" href="./style.css?v=4">
+<script>try{var o=JSON.parse(localStorage.getItem('cw-drill-v1')||'{}');if(o.theme==='dark')document.documentElement.dataset.theme='dark'}catch(e){}</script>
+<link rel="stylesheet" href="./style.css?v=5">
 </head>
 <body>
 <div class="wrap">
@@ -16,7 +17,10 @@
   <img class="logo" src="./img/logo.svg" alt="E74BYZ">
   <div class="htext"><h1><span>-.-.</span>CW copy drill</h1><div class="sub" data-i18n="sub"></div></div>
   <div class="hside">
-    <select id="lang" aria-label="Language"><option value="en">EN</option><option value="sr">SR</option><option value="sr-Cyrl">СР</option></select>
+    <div class="hctl">
+      <div class="langs" id="langs" role="group" aria-label="Language"><button data-lang="sr">LAT</button><span>·</span><button data-lang="sr-Cyrl">ЋИР</button><span>·</span><button data-lang="en">ENG</button></div>
+      <button class="themeBtn" id="themeBtn"><svg viewBox="0 0 24 24" id="themeIcon"></svg></button>
+    </div>
     <div class="sync" id="sync"></div>
   </div>
 </header>
@@ -98,6 +102,6 @@
   <div class="keys" data-i18n-html="help"></div>
 </div>
 </div>
-<script type="module" src="./js/app.js?v=4"></script>
+<script type="module" src="./js/app.js?v=5"></script>
 </body>
 </html>

@@ -4,7 +4,7 @@ export const DEF={
   mode:'chars',order:'koch',
   wpm:22,charGap:3,wordGap:7,repeats:1,repeatGap:1,hz:600,vol:50,
   lenMin:3,lenMax:5,maxSame:2,limit:true,
-  slow:3,unlock:80,engine:'browser',micId:'',showMastery:false,lang:'',
+  slow:3,unlock:80,engine:'browser',micId:'',showMastery:false,lang:'',theme:'light',
   hist:[],prog:{}
 };
 const KEYS=Object.keys(DEF).filter(k=>k!=='hist'&&k!=='prog');

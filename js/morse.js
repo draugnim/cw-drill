@@ -1,4 +1,4 @@
-import {MORSE} from './data.js?v=4';
+import {MORSE} from './data.js?v=5';
 
 /* Sidetone player. Timing in "dits" at the character speed:
    dit 1, dah 3, gap inside a character 1, between characters charGap (standard 3),

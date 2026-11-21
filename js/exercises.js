@@ -1,4 +1,4 @@
-import {KOCH,LET,DIG,FULL,WORDS,PREFIXES,DIGITS} from './data.js?v=4';
+import {KOCH,LET,DIG,FULL,WORDS,PREFIXES,DIGITS} from './data.js?v=5';
 
 /* ---------- per-character progress ---------- */
 export function sequence(cfg){return cfg.order==='koch'?KOCH:cfg.order==='letters'?LET:FULL}
