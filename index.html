@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CW copy drill</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1014;--panel:#161920;--panel2:#1c2029;--line:#272c37;--line2:#353b48;
+  --text:#e9e7e2;--muted:#8b919c;--dim:#5c626d;
+  --amber:#f5a524;--amber-d:#3a2a0c;--green:#3ccf91;--green-d:#0f2e22;--red:#ff6161;--red-d:#3a1414;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;--sans:Inter,system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+body{min-height:100vh;padding:20px 14px 40px}
+.wrap{max-width:560px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+h1{font-size:18px;font-weight:600;margin:0;letter-spacing:.01em}
+h1 span{color:var(--amber);font-family:var(--mono);font-weight:600;margin-right:6px}
+.sub{font-size:12px;color:var(--muted);margin-top:2px}
+.sync{font-size:11px;color:var(--dim);font-family:var(--mono)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+.scope{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:12px;height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.scope::before{content:"";position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:24px 24px;opacity:.35;pointer-events:none}
+.led{position:absolute;top:12px;left:12px;width:10px;height:10px;border-radius:50%;background:#2a2f39;transition:background .03s,box-shadow .03s}
+.led.on{background:var(--amber);box-shadow:0 0 12px var(--amber)}
+.state{position:absolute;top:9px;right:12px;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.big{position:relative;font-family:var(--mono);font-size:84px;font-weight:600;line-height:1;transition:color .15s}
+.big.ok{color:var(--green)}.big.bad{color:var(--red)}.big.wait{color:var(--dim)}
+.pat{position:relative;font-family:var(--mono);font-size:22px;letter-spacing:.25em;color:var(--amber);height:28px;margin-top:10px}
+.msg{font-size:14px;color:var(--muted);text-align:center;min-height:20px;margin:12px 0 4px}
+.msg b{color:var(--text);font-weight:500}
+.live{font-family:var(--mono);font-size:12px;color:var(--dim);text-align:center;min-height:16px;margin-bottom:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btns{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px}
+button{font-family:var(--sans);font-size:14px;font-weight:500;color:var(--text);background:var(--panel2);border:1px solid var(--line2);border-radius:10px;height:46px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .12s,border-color .12s,transform .06s}
+button:hover{background:#232835;border-color:#434a5a}
+button:active{transform:scale(.98)}
+button.primary{background:var(--amber);color:#1b1404;border-color:var(--amber)}
+button.primary:hover{background:#ffb43d}
+button.mic{width:100%;margin-top:8px}
+button.mic.on{background:var(--red-d);border-color:var(--red);color:#ffd5d5}
+button.mic .dot{width:8px;height:8px;border-radius:50%;background:var(--dim)}
+button.mic.on .dot{background:var(--red);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.3}}
+svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.type{display:flex;gap:8px;margin-top:8px}
+input[type=text]{flex:1;height:42px;background:var(--bg);border:1px solid var(--line2);border-radius:10px;color:var(--text);font-family:var(--mono);font-size:14px;padding:0 12px;outline:none}
+input[type=text]:focus{border-color:var(--amber)}
+.note{font-size:12px;color:var(--dim);margin-top:8px;line-height:1.5}
+.err{font-size:12px;color:var(--red);min-height:16px;margin-top:6px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat p{margin:0;font-size:11px;color:var(--muted)}
+.stat b{display:block;font-family:var(--mono);font-size:20px;font-weight:600;margin-top:2px}
+.sec{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 10px}
+.sec h2{font-size:13px;font-weight:500;margin:0;color:var(--muted);letter-spacing:.02em}
+.sec span{font-size:12px;color:var(--dim)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px}
+.cell{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 0 8px;text-align:center;overflow:hidden}
+.cell .c{font-family:var(--mono);font-size:16px;font-weight:600}
+.cell .p{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.cell .bar{position:absolute;left:0;bottom:0;height:3px}
+.cell.locked{opacity:.3}
+.cell.cur{border-color:var(--amber)}
+.weak{font-size:13px;color:var(--muted);margin-top:12px;min-height:18px}
+.weak b{color:var(--red);font-family:var(--mono);font-weight:600}
+details{margin-top:14px}
+summary{cursor:pointer;font-size:13px;color:var(--muted);list-style:none;display:flex;align-items:center;gap:6px}
+summary::-webkit-details-marker{display:none}
+.set{display:grid;grid-template-columns:110px 1fr 64px;align-items:center;gap:10px;margin-top:12px;font-size:13px}
+.set label{color:var(--muted)}
+.set output{font-family:var(--mono);font-size:12px;text-align:right}
+input[type=range]{width:100%;accent-color:var(--amber)}
+select{background:var(--bg);color:var(--text);border:1px solid var(--line2);border-radius:8px;height:34px;padding:0 8px;font-family:var(--sans);font-size:13px;grid-column:2/4}
+.danger{height:36px;font-size:13px;margin-top:14px;width:100%;color:var(--red);border-color:#4a2323;background:transparent}
+.danger.arm{background:var(--red-d)}
+.keys{font-size:11px;color:var(--dim);margin-top:14px;font-family:var(--mono);line-height:1.8}
+kbd{border:1px solid var(--line2);border-radius:4px;padding:0 5px;color:var(--muted)}
+@media (max-width:420px){.big{font-size:72px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div><h1><span>-.-.</span>CW copy drill</h1><div class="sub">Hear it, say it. Weak characters come back more often.</div></div>
+  <div class="sync" id="sync">this device</div>
+</header>
+
+<div class="card">
+  <div class="scope">
+    <div class="led" id="led"></div>
+    <div class="state" id="state">ready</div>
+    <div class="big wait" id="big">?</div>
+    <div class="pat" id="pat"></div>
+  </div>
+  <div class="msg" id="msg">Press <b>Start</b>, then answer each character with its phonetic name, or say <b>nope</b>.</div>
+  <div class="live" id="live"></div>
+  <div class="btns">
+    <button class="primary" id="start"><svg viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg><span id="startL">Start</span></button>
+    <button id="rep"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>Replay</button>
+    <button id="nope"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>Nope</button>
+  </div>
+  <button class="mic" id="mic"><span class="dot"></span><span id="micL">Open mic</span></button>
+  <div class="type">
+    <input type="text" id="ans" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Or type / dictate: kilo, two, stop…">
+  </div>
+  <div class="err" id="err"></div>
+  <div class="note" id="micNote">Checking for open-mic support…</div>
+</div>
+
+<div class="stats">
+  <div class="stat"><p>Accuracy</p><b id="sAcc">–</b></div>
+  <div class="stat"><p>Streak</p><b id="sStr">0</b></div>
+  <div class="stat"><p>Learned</p><b id="sLrn">0</b></div>
+  <div class="stat"><p>Answers</p><b id="sN">0</b></div>
+</div>
+
+<div class="card">
+  <div class="sec"><h2>Mastery</h2><span id="setInfo"></span></div>
+  <div class="grid" id="grid"></div>
+  <div class="weak" id="weak"></div>
+
+  <details>
+    <summary><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</summary>
+    <div class="set"><label for="order">Character set</label><select id="order"><option value="koch">Koch order (starts with K M)</option><option value="letters">All letters</option><option value="full">Letters, numbers, punctuation</option></select></div>
+    <div class="set"><label for="wpm">Speed</label><input type="range" id="wpm" min="12" max="45" step="1"><output id="wpmO"></output></div>
+    <div class="set"><label for="hz">Tone</label><input type="range" id="hz" min="400" max="900" step="10"><output id="hzO"></output></div>
+    <div class="set"><label for="vol">Volume</label><input type="range" id="vol" min="5" max="100" step="5"><output id="volO"></output></div>
+    <div class="set"><label for="slow">Slow after</label><input type="range" id="slow" min="1" max="6" step="0.5"><output id="slowO"></output></div>
+    <div class="set"><label for="unlock">Unlock at</label><input type="range" id="unlock" min="60" max="95" step="5"><output id="unlockO"></output></div>
+    <button class="danger" id="resetB">Reset progress for this character set</button>
+  </details>
+  <div class="keys">Keys (outside the text box): <kbd>Space</kbd> start/pause · <kbd>R</kbd> replay · <kbd>N</kbd> nope · <kbd>M</kbd> mic</div>
+</div>
+</div>
+
+<script>
+const MORSE={A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.','.':'.-.-.-',',':'--..--','?':'..--..','/':'-..-.','=':'-...-'};
+const NATO={A:'Alfa',B:'Bravo',C:'Charlie',D:'Delta',E:'Echo',F:'Foxtrot',G:'Golf',H:'Hotel',I:'India',J:'Juliett',K:'Kilo',L:'Lima',M:'Mike',N:'November',O:'Oscar',P:'Papa',Q:'Quebec',R:'Romeo',S:'Sierra',T:'Tango',U:'Uniform',V:'Victor',W:'Whiskey',X:'X-ray',Y:'Yankee',Z:'Zulu','0':'Zero','1':'One','2':'Two','3':'Three','4':'Four','5':'Five','6':'Six','7':'Seven','8':'Eight','9':'Nine','.':'Stop',',':'Comma','?':'Question','/':'Slash','=':'Break'};
+const ALIAS={ALPHA:'A',ALFA:'A',JULIET:'J',XRAY:'X',EXRAY:'X',WHISKY:'W',NINER:'9',OH:'0',PERIOD:'.',DOT:'.',FULLSTOP:'.',QUESTIONMARK:'?',STROKE:'/',EQUALS:'=',EQUAL:'=',BT:'=',TOO:'2',TO:'2',FOR:'4',FORE:'4',ATE:'8',WON:'1',MIC:'M',MIKES:'M',KEELO:'K',KILLO:'K',KILO:'K',KIRO:'K',CHARLY:'C',GOLFE:'G',PAPPA:'P',ROMIO:'R',TANGO:'T',VICTER:'V',ZOOLOO:'Z',SIERA:'S',CIERA:'S',INDIA:'I',LEEMA:'L',HOTELS:'H',QUEBECK:'Q',KEBEC:'Q',YANKY:'Y',ECCO:'E',ECHOES:'E',OSCAR:'O'};
+const NOPE=new Set(['NOPE','NO','PASS','SKIP','DUNNO','NEXT','NOPES']);
+const KOCH='KMURESNAPTLWI.JZ=FOY,VG5/Q92H38B?47C1D60X'.split('');
+const LET='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const FULL=LET.concat('0123456789.,?/='.split(''));
+const LOOKUP={};for(const k in NATO)LOOKUP[NATO[k].toUpperCase().replace(/[^A-Z]/g,'')]=k;Object.assign(LOOKUP,ALIAS);
+const NUMW={ZERO:'0',ONE:'1',TWO:'2',THREE:'3',FOUR:'4',FIVE:'5',SIX:'6',SEVEN:'7',EIGHT:'8',NINE:'9'};Object.assign(LOOKUP,NUMW);
+
+const $=id=>document.getElementById(id);
+const DEF={order:'koch',wpm:22,hz:600,vol:50,slow:3,unlock:80,prog:{}};
+let cfg=JSON.parse(JSON.stringify(DEF)),ts=0;
+let ctx=null,osc=null,gain=null,cur=null,busy=false,running=false,playEnd=0,timer=null,ledTimers=[];
+let sess={ok:0,n:0,streak:0};
+
+function seq(){return cfg.order==='koch'?KOCH:cfg.order==='letters'?LET:FULL}
+function prog(){let p=cfg.prog[cfg.order];if(!p){const o=seq();p={active:cfg.order==='koch'?o.slice(0,2):o.slice(),S:{}};cfg.prog[cfg.order]=p}seq().forEach(c=>{if(!p.S[c])p.S[c]={s:0.3,a:0,ok:0}});return p}
+
+function parseTok(t){t=String(t).toUpperCase().trim();if(t.length>1)t=t.replace(/[.,?!]+$/,'');t=t.replace(/[^A-Z0-9.,?/=]/g,'');if(!t)return null;if(t.length===1&&MORSE[t])return t;if(NOPE.has(t))return 'NOPE';return LOOKUP[t]||'BAD'}
+function findAnswer(text){const toks=String(text).match(/\S+/g)||[];for(let i=toks.length-1;i>=0;i--){const g=parseTok(toks[i]);if(g&&g!=='BAD')return g}return null}
+
+function pick(){const p=prog(),a=p.active;const w=a.map(c=>Math.pow(1-p.S[c].s,2)+0.04);let tot=w.reduce((x,y)=>x+y,0),r=Math.random()*tot;
+  for(let i=0;i<a.length;i++){r-=w[i];if(r<=0){if(a[i]===cur&&a.length>2&&Math.random()<0.6)return pick();return a[i]}}return a[a.length-1]}
+
+function audio(){if(!ctx){ctx=new (window.AudioContext||window.webkitAudioContext)()}if(ctx.state==='suspended')ctx.resume();return ctx}
+function stopTone(){try{osc&&osc.stop()}catch(e){}osc=null;ledTimers.forEach(clearTimeout);ledTimers=[];$('led').classList.remove('on')}
+function play(ch){stopTone();const c=audio(),u=1.2/cfg.wpm,r=0.005,amp=cfg.vol/100*0.6;
+  osc=c.createOscillator();gain=c.createGain();osc.frequency.value=cfg.hz;gain.gain.value=0;osc.connect(gain).connect(c.destination);
+  const t0=c.currentTime+0.08;let t=t0;
+  for(const e of MORSE[ch]){const d=e==='.'?u:3*u;gain.gain.setValueAtTime(0,t);gain.gain.linearRampToValueAtTime(amp,t+r);gain.gain.setValueAtTime(amp,t+d-r);gain.gain.linearRampToValueAtTime(0,t+d);
+    const on=(t-c.currentTime)*1000,off=(t+d-c.currentTime)*1000;ledTimers.push(setTimeout(()=>$('led').classList.add('on'),on),setTimeout(()=>$('led').classList.remove('on'),off));t+=d+u}
+  osc.start(t0-0.01);osc.stop(t+0.05);playEnd=performance.now()+(t-u-c.currentTime)*1000}
+
+function patHTML(ch){return MORSE[ch].split('').map(x=>x==='.'?'•':'—').join(' ')}
+function setBig(txt,cls){const b=$('big');b.textContent=txt;b.className='big '+(cls||'')}
+
+function next(){if(!running)return;cur=pick();busy=false;setBig('?','wait');$('pat').textContent='';$('state').textContent='listening';
+  $('msg').innerHTML='What was that?';play(cur);render()}
+
+function maybeUnlock(){const p=prog(),o=seq();if(p.active.length>=o.length)return null;const th=cfg.unlock/100;
+  if(p.active.every(c=>p.S[c].s>=th&&p.S[c].a>=4)){const nc=o[p.active.length];p.active.push(nc);p.S[nc].s=0.15;return nc}return null}
+
+function answer(g){if(!running||busy||!cur)return false;busy=true;$('err').textContent='';
+  const p=prog(),st=p.S[cur],dt=Math.max(0,(performance.now()-playEnd)/1000);st.a++;sess.n++;let delay=1000;
+  if(g===cur){const fast=dt<=cfg.slow;st.ok++;sess.ok++;sess.streak++;st.s+=(1-st.s)*(fast?0.32:0.1);
+    setBig(cur,'ok');$('pat').textContent=patHTML(cur);
+    $('msg').innerHTML=fast?`<b>${NATO[cur]}</b> — correct`:`<b>${NATO[cur]}</b> — correct, but slow (${dt.toFixed(1)} s)`;
+  }else{st.s*=0.45;sess.streak=0;setBig(cur,'bad');$('pat').textContent=patHTML(cur);
+    $('msg').innerHTML=(g==='NOPE'?'It was ':`Not ${NATO[g]||g}. It was `)+`<b>${NATO[cur]}</b>`;delay=2700;
+    const c=cur;setTimeout(()=>{if(running)play(c)},600)}
+  st.s=Math.min(1,Math.max(0,st.s));
+  const nc=maybeUnlock();if(nc){$('msg').innerHTML+=` · <span style="color:var(--amber)">New character: <b>${nc}</b> ${NATO[nc]}</span>`;const at=delay+300;delay+=2600;setTimeout(()=>{if(running){setBig(nc,'');$('pat').textContent=patHTML(nc);play(nc)}},at)}
+  $('state').textContent='';render();save();clearTimeout(timer);timer=setTimeout(next,delay);return true}
+
+function render(){const p=prog(),o=seq();
+  $('grid').innerHTML=o.map(c=>{const on=p.active.includes(c),st=p.S[c],s=st.s,pct=st.a?Math.round(s*100):0;
+    const col=s<0.4?'var(--red)':s<0.7?'var(--amber)':'var(--green)';
+    return `<div class="cell${on?'':' locked'}${c===cur&&running?' cur':''}" title="${NATO[c]}: ${st.ok}/${st.a} correct"><div class="c">${c}</div><div class="p">${on?(st.a?pct+'%':'new'):'–'}</div>${on?`<div class="bar" style="width:${Math.max(6,s*100)}%;background:${col}"></div>`:''}</div>`}).join('');
+  const learned=p.active.filter(c=>p.S[c].s>=cfg.unlock/100&&p.S[c].a>=4).length;
+  $('sAcc').textContent=sess.n?Math.round(100*sess.ok/sess.n)+'%':'–';$('sStr').textContent=sess.streak;$('sLrn').textContent=learned+'/'+o.length;$('sN').textContent=sess.n;
+  $('setInfo').textContent=`${p.active.length} of ${o.length} in rotation`;
+  const weak=p.active.filter(c=>p.S[c].a>0&&p.S[c].s<0.6).sort((a,b)=>p.S[a].s-p.S[b].s).slice(0,5);
+  $('weak').innerHTML=weak.length?'Drilling most: '+weak.map(c=>`<b>${c}</b> ${NATO[c]}`).join(' · '):''}
+
+function start(){audio();running=true;$('startL').textContent='Pause';$('start').querySelector('svg').innerHTML='<path d="M8 5v14M16 5v14"/>';next()}
+function pause(){running=false;clearTimeout(timer);stopTone();busy=false;$('startL').textContent='Start';$('start').querySelector('svg').innerHTML='<path d="M7 4v16l13-8z"/>';$('state').textContent='paused';$('msg').innerHTML='Paused. Press <b>Start</b> to continue.';render()}
+$('start').onclick=()=>running?pause():start();
+$('rep').onclick=()=>{if(!cur){$('err').textContent='Press Start first.';return}play(cur)};
+$('nope').onclick=()=>{if(!running){$('err').textContent='Press Start first.';return}answer('NOPE')};
+
+/* typed / keyboard-dictated input */
+let proc=0;
+$('ans').addEventListener('input',()=>{$('err').textContent='';const v=$('ans').value;if(v.length<proc)proc=v.length;const g=findAnswer(v.slice(proc));if(g){proc=v.length;if(!answer(g)&&!running)$('err').textContent='Press Start first.'}});
+$('ans').addEventListener('keydown',e=>{if(e.key!=='Enter')return;const v=$('ans').value.slice(proc);if(!running){$('err').textContent='Press Start first.';return}const g=findAnswer(v);if(g)answer(g);else $('err').textContent='Didn’t recognise that. Try e.g. Kilo, Two, Stop, or nope.';$('ans').value='';proc=0});
+
+/* keyboard shortcuts */
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.metaKey||e.ctrlKey)return;const k=e.key.toLowerCase();
+  if(k===' '){e.preventDefault();running?pause():start()}else if(k==='r')$('rep').click();else if(k==='n')$('nope').click();else if(k==='m'&&!$('mic').hidden)$('mic').click()});
+
+/* settings */
+function bindRange(id,fmt){const el=$(id);el.value=cfg[id];$(id+'O').textContent=fmt(cfg[id]);el.addEventListener('input',()=>{cfg[id]=+el.value;$(id+'O').textContent=fmt(cfg[id]);save()})}
+function initSettings(){bindRange('wpm',v=>v+' wpm');bindRange('hz',v=>v+' Hz');bindRange('vol',v=>v+'%');bindRange('slow',v=>v+' s');bindRange('unlock',v=>v+'%');
+  $('order').value=cfg.order;}
+$('order').addEventListener('change',()=>{cfg.order=$('order').value;cur=null;if(running)pause();render();save()});
+let armT;$('resetB').onclick=()=>{const b=$('resetB');if(!b.classList.contains('arm')){b.classList.add('arm');b.textContent='Tap again to confirm reset';armT=setTimeout(()=>{b.classList.remove('arm');b.textContent='Reset progress for this character set'},3000);return}
+  clearTimeout(armT);b.classList.remove('arm');b.textContent='Reset progress for this character set';delete cfg.prog[cfg.order];sess={ok:0,n:0,streak:0};cur=null;if(running)pause();render();save()};
+
+/* persistence: this browser only */
+const LS='cw-drill-v1';
+function snapshot(){return {order:cfg.order,wpm:cfg.wpm,hz:cfg.hz,vol:cfg.vol,slow:cfg.slow,unlock:cfg.unlock,prog:cfg.prog,ts}}
+function apply(o){if(!o||typeof o!=='object')return;for(const k of ['order','wpm','hz','vol','slow','unlock'])if(o[k]!==undefined)cfg[k]=o[k];if(o.prog&&typeof o.prog==='object')cfg.prog=o.prog;ts=o.ts||0}
+function save(){ts=Date.now();try{localStorage.setItem(LS,JSON.stringify(snapshot()));$('sync').textContent='saved'}catch(e){$('sync').textContent='not saved'}}
+try{apply(JSON.parse(localStorage.getItem(LS)||'null'))}catch(e){}
+initSettings();render();
+
+/* open mic via the browser's own speech recognition */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null,micOn=false,consumed=0,lastIdx=-1,restarts=0,lastStart=0;
+function micUI(on,label){$('mic').classList.toggle('on',on);$('micL').textContent=label||(on?'Mic open — listening':'Open mic')}
+function handleAlts(alts){
+  const base=alts[0]||'';$('live').textContent=base?'“'+base.trim()+'”':'';
+  const toks=base.match(/\S+/g)||[];if(toks.length<=consumed)return;
+  for(const a of alts){const t=(a.match(/\S+/g)||[]).slice(consumed);for(let i=t.length-1;i>=0;i--){const g=parseTok(t[i]);if(g&&g!=='BAD'){consumed=Math.max(toks.length,consumed+1);answer(g);return}}}
+  if(busy||!running)consumed=toks.length}
+function micStart(){
+  rec=new SR();rec.lang='en-US';rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=5;
+  consumed=0;lastIdx=-1;lastStart=Date.now();
+  rec.onstart=()=>micUI(true);
+  rec.onresult=e=>{const i=e.results.length-1,r=e.results[i];if(i!==lastIdx){lastIdx=i;consumed=0}
+    handleAlts(Array.from(r).map(x=>x.transcript));restarts=0};
+  rec.onerror=ev=>{const c=ev.error;
+    if(c==='not-allowed'||c==='service-not-allowed'){micOn=false;micUI(false);$('err').textContent='Microphone blocked. Allow it for this site in Chrome → Site settings → Microphone, then reload.'}
+    else if(c==='audio-capture'){micOn=false;micUI(false);$('err').textContent='No microphone found, or another app is using it.'}
+    else if(c==='network'){$('err').textContent='Speech recognition needs an internet connection. Retrying…'}};
+  rec.onend=()=>{if(!micOn){micUI(false);return}
+    if(Date.now()-lastStart<1000)restarts++;
+    if(restarts>5){micOn=false;micUI(false);$('err').textContent='The mic keeps closing. Tap Open mic to try again.';return}
+    setTimeout(()=>{if(micOn)try{micStart()}catch(e){micOn=false;micUI(false)}},restarts?600:100)};
+  try{rec.start()}catch(e){}
+}
+if(!SR){$('mic').hidden=true;$('micNote').textContent='This browser has no speech recognition. Use Chrome on Android or a computer.'}
+else if(!window.isSecureContext){$('mic').hidden=true;$('micNote').textContent='The mic needs this page served over https:// (or localhost).'}
+else $('micNote').innerHTML='Tap <b>Open mic</b> once and keep talking — it reopens by itself after pauses. Headphones help, so the mic doesn’t hear the tone.';
+$('mic').onclick=()=>{$('err').textContent='';audio();
+  if(micOn){micOn=false;try{rec&&rec.stop()}catch(e){}micUI(false);$('live').textContent='';return}
+  micOn=true;restarts=0;micUI(true,'Requesting mic…');micStart()};
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)pause()});
+</script>
+</body>
+</html>
