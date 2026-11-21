@@ -183,17 +183,29 @@ function next(){if(!running)return;cur=pick();busy=false;setBig('?','wait');$('p
 function maybeUnlock(){const p=prog(),o=seq();if(p.active.length>=o.length)return null;const th=cfg.unlock/100;
   if(p.active.every(c=>p.S[c].s>=th&&p.S[c].a>=4)){const nc=o[p.active.length];p.active.push(nc);p.S[nc].s=0.15;return nc}return null}
 
+let speaking=false,ignoreUntil=0;
+function schedule(fn,ms){clearTimeout(timer);timer=setTimeout(fn,ms)}
+function pickVoice(){try{const v=speechSynthesis.getVoices();return v.find(x=>/^en[-_]US/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null}catch(e){return null}}
+function say(text,cb){
+  if(!('speechSynthesis' in window)){schedule(cb,2000);return}
+  let done=false;const fin=()=>{if(done)return;done=true;speaking=false;ignoreUntil=performance.now()+1300;if(running)cb()};
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-US';const v=pickVoice();if(v)u.voice=v;u.rate=1;u.onend=fin;u.onerror=fin;
+    speaking=true;speechSynthesis.speak(u);setTimeout(fin,4000)}catch(e){speaking=false;schedule(cb,2000)}}
+function introNew(nc,cb){if(!running)return;setBig(nc,'');$('pat').textContent=patHTML(nc);play(nc);schedule(cb,2600)}
+
 function answer(g){if(!running||busy||!cur)return false;busy=true;$('err').textContent='';
-  const p=prog(),st=p.S[cur],dt=Math.max(0,(performance.now()-playEnd)/1000);st.a++;sess.n++;let delay=1000;
-  if(g===cur){const fast=dt<=cfg.slow;st.ok++;sess.ok++;sess.streak++;st.s+=(1-st.s)*(fast?0.32:0.1);
+  const p=prog(),st=p.S[cur],dt=Math.max(0,(performance.now()-playEnd)/1000);st.a++;sess.n++;const wrong=g!==cur,was=cur;
+  if(!wrong){const fast=dt<=cfg.slow;st.ok++;sess.ok++;sess.streak++;st.s+=(1-st.s)*(fast?0.32:0.1);
     setBig(cur,'ok');$('pat').textContent=patHTML(cur);
     $('msg').innerHTML=fast?`<b>${NATO[cur]}</b> — correct`:`<b>${NATO[cur]}</b> — correct, but slow (${dt.toFixed(1)} s)`;
   }else{st.s*=0.45;sess.streak=0;setBig(cur,'bad');$('pat').textContent=patHTML(cur);
-    $('msg').innerHTML=(g==='NOPE'?'It was ':`Not ${NATO[g]||g}. It was `)+`<b>${NATO[cur]}</b>`;delay=2700;
-    const c=cur;setTimeout(()=>{if(running)play(c)},600)}
+    $('msg').innerHTML=(g==='NOPE'?'It was ':`Not ${NATO[g]||g}. It was `)+`<b>${NATO[cur]}</b>`}
   st.s=Math.min(1,Math.max(0,st.s));
-  const nc=maybeUnlock();if(nc){$('msg').innerHTML+=` · <span style="color:var(--amber)">New character: <b>${nc}</b> ${NATO[nc]}</span>`;const at=delay+300;delay+=2600;setTimeout(()=>{if(running){setBig(nc,'');$('pat').textContent=patHTML(nc);play(nc)}},at)}
-  $('state').textContent='';render();save();clearTimeout(timer);timer=setTimeout(next,delay);return true}
+  const nc=maybeUnlock();if(nc)$('msg').innerHTML+=` · <span style="color:var(--amber)">New character: <b>${nc}</b> ${NATO[nc]}</span>`;
+  $('state').textContent='';render();save();
+  const after=()=>nc?introNew(nc,next):schedule(next,wrong?600:0);
+  if(wrong)say(NATO[was],after);else schedule(after,1000);
+  return true}
 
 function render(){const p=prog(),o=seq();
   $('grid').innerHTML=o.map(c=>{const on=p.active.includes(c),st=p.S[c],s=st.s,pct=st.a?Math.round(s*100):0;
@@ -206,7 +218,7 @@ function render(){const p=prog(),o=seq();
   $('weak').innerHTML=weak.length?'Drilling most: '+weak.map(c=>`<b>${c}</b> ${NATO[c]}`).join(' · '):''}
 
 function start(){audio();running=true;$('startL').textContent='Pause';$('start').querySelector('svg').innerHTML='<path d="M8 5v14M16 5v14"/>';next()}
-function pause(){running=false;clearTimeout(timer);stopTone();busy=false;$('startL').textContent='Start';$('start').querySelector('svg').innerHTML='<path d="M7 4v16l13-8z"/>';$('state').textContent='paused';$('msg').innerHTML='Paused. Press <b>Start</b> to continue.';render()}
+function pause(){running=false;clearTimeout(timer);try{speechSynthesis.cancel()}catch(e){}speaking=false;stopTone();busy=false;$('startL').textContent='Start';$('start').querySelector('svg').innerHTML='<path d="M7 4v16l13-8z"/>';$('state').textContent='paused';$('msg').innerHTML='Paused. Press <b>Start</b> to continue.';render()}
 $('start').onclick=()=>running?pause():start();
 $('rep').onclick=()=>{if(!cur){$('err').textContent='Press Start first.';return}play(cur)};
 $('nope').onclick=()=>{if(!running){$('err').textContent='Press Start first.';return}answer('NOPE')};
@@ -243,6 +255,7 @@ function micUI(on,label){$('mic').classList.toggle('on',on);$('micL').textConten
 function handleAlts(alts){
   const base=alts[0]||'';$('live').textContent=base?'“'+base.trim()+'”':'';
   const toks=base.match(/\S+/g)||[];if(toks.length<=consumed)return;
+  if(speaking||performance.now()<ignoreUntil){consumed=toks.length;return}
   for(const a of alts){const t=(a.match(/\S+/g)||[]).slice(consumed);for(let i=t.length-1;i>=0;i--){const g=parseTok(t[i]);if(g&&g!=='BAD'){consumed=Math.max(toks.length,consumed+1);answer(g);return}}}
   if(busy||!running)consumed=toks.length}
 function micStart(){
