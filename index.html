@@ -134,7 +134,8 @@ kbd{border:1px solid var(--line2);border-radius:4px;padding:0 5px;color:var(--mu
     <div class="set"><label for="vol">Volume</label><input type="range" id="vol" min="5" max="100" step="5"><output id="volO"></output></div>
     <div class="set"><label for="slow">Slow after</label><input type="range" id="slow" min="1" max="6" step="0.5"><output id="slowO"></output></div>
     <div class="set"><label for="unlock">Unlock at</label><input type="range" id="unlock" min="60" max="95" step="5"><output id="unlockO"></output></div>
-    <div class="set"><label for="btmic">Mic</label><select id="btmic"><option value="0">Phone default</option><option value="1">Prefer earbuds (experimental)</option></select></div>
+    <div class="set"><label for="engine">Recogniser</label><select id="engine"><option value="browser">Phone’s speech service</option><option value="offline">Offline, choose mic (40 MB)</option></select></div>
+    <div class="set" id="micDevRow"><label for="micDev">Mic input</label><select id="micDev"><option value="">Auto (earbuds if found)</option></select></div>
     <button class="danger" id="resetB">Reset progress for this character set</button>
   </details>
   <div class="keys">Keys (outside the text box): <kbd>Space</kbd> start/pause · <kbd>R</kbd> replay · <kbd>N</kbd> nope · <kbd>M</kbd> mic</div>
@@ -153,7 +154,7 @@ const LOOKUP={};for(const k in NATO)LOOKUP[NATO[k].toUpperCase().replace(/[^A-Z]
 const NUMW={ZERO:'0',ONE:'1',TWO:'2',THREE:'3',FOUR:'4',FIVE:'5',SIX:'6',SEVEN:'7',EIGHT:'8',NINE:'9'};Object.assign(LOOKUP,NUMW);
 
 const $=id=>document.getElementById(id);
-const DEF={order:'koch',wpm:22,hz:600,vol:50,slow:3,unlock:80,btmic:false,prog:{}};
+const DEF={order:'koch',wpm:22,hz:600,vol:50,slow:3,unlock:80,engine:'browser',micId:'',prog:{}};
 let cfg=JSON.parse(JSON.stringify(DEF)),ts=0;
 let ctx=null,osc=null,gain=null,cur=null,busy=false,running=false,playEnd=0,timer=null,ledTimers=[];
 let sess={ok:0,n:0,streak:0};
@@ -237,64 +238,112 @@ document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.
 /* settings */
 function bindRange(id,fmt){const el=$(id);el.value=cfg[id];$(id+'O').textContent=fmt(cfg[id]);el.addEventListener('input',()=>{cfg[id]=+el.value;$(id+'O').textContent=fmt(cfg[id]);save()})}
 function initSettings(){bindRange('wpm',v=>v+' wpm');bindRange('hz',v=>v+' Hz');bindRange('vol',v=>v+'%');bindRange('slow',v=>v+' s');bindRange('unlock',v=>v+'%');
-  $('order').value=cfg.order;$('btmic').value=cfg.btmic?'1':'0';}
-$('btmic').addEventListener('change',()=>{cfg.btmic=$('btmic').value==='1';save();if(micOn)$('err').textContent='Turn the mic off and on again to apply.'});
+  $('order').value=cfg.order;$('engine').value=cfg.engine==='offline'?'offline':'browser';$('micDevRow').hidden=cfg.engine!=='offline';}
 $('order').addEventListener('change',()=>{cfg.order=$('order').value;cur=null;if(running)pause();render();save()});
 let armT;$('resetB').onclick=()=>{const b=$('resetB');if(!b.classList.contains('arm')){b.classList.add('arm');b.textContent='Tap again to confirm reset';armT=setTimeout(()=>{b.classList.remove('arm');b.textContent='Reset progress for this character set'},3000);return}
   clearTimeout(armT);b.classList.remove('arm');b.textContent='Reset progress for this character set';delete cfg.prog[cfg.order];sess={ok:0,n:0,streak:0};cur=null;if(running)pause();render();save()};
 
 /* persistence: this browser only */
 const LS='cw-drill-v1';
-function snapshot(){return {order:cfg.order,wpm:cfg.wpm,hz:cfg.hz,vol:cfg.vol,slow:cfg.slow,unlock:cfg.unlock,btmic:cfg.btmic,prog:cfg.prog,ts}}
-function apply(o){if(!o||typeof o!=='object')return;for(const k of ['order','wpm','hz','vol','slow','unlock','btmic'])if(o[k]!==undefined)cfg[k]=o[k];if(o.prog&&typeof o.prog==='object')cfg.prog=o.prog;ts=o.ts||0}
+function snapshot(){return {order:cfg.order,wpm:cfg.wpm,hz:cfg.hz,vol:cfg.vol,slow:cfg.slow,unlock:cfg.unlock,engine:cfg.engine,micId:cfg.micId,prog:cfg.prog,ts}}
+function apply(o){if(!o||typeof o!=='object')return;for(const k of ['order','wpm','hz','vol','slow','unlock','engine','micId'])if(o[k]!==undefined)cfg[k]=o[k];if(o.prog&&typeof o.prog==='object')cfg.prog=o.prog;ts=o.ts||0}
 function save(){ts=Date.now();try{localStorage.setItem(LS,JSON.stringify(snapshot()));$('sync').textContent='saved'}catch(e){$('sync').textContent='not saved'}}
 try{apply(JSON.parse(localStorage.getItem(LS)||'null'))}catch(e){}
 initSettings();render();
 
-/* open mic via the browser's own speech recognition */
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-let hold=null,rec=null,micOn=false,consumed=0,lastIdx=-1,restarts=0,lastStart=0;
-const BTRX=/bluetooth|buds|headset|hands-?free|sco/i;
-async function acquireHold(){
-  const c={echoCancellation:true,noiseSuppression:true,autoGainControl:true};
-  let s=await navigator.mediaDevices.getUserMedia({audio:c});
-  try{const devs=await navigator.mediaDevices.enumerateDevices();
-    const bt=devs.find(d=>d.kind==='audioinput'&&BTRX.test(d.label));const cur=(s.getAudioTracks()[0]||{}).label||'';
-    if(bt&&!BTRX.test(cur)){const s2=await navigator.mediaDevices.getUserMedia({audio:Object.assign({},c,{deviceId:{exact:bt.deviceId}})});s.getTracks().forEach(t=>t.stop());s=s2}}catch(e){}
-  hold=s;$('micSrc').textContent='Holding mic input: '+(((s.getAudioTracks()[0]||{}).label)||'unknown device');}
-function releaseHold(){if(hold){hold.getTracks().forEach(t=>t.stop());hold=null}$('micSrc').textContent=''}
-function micUI(on,label){if(!on&&!micOn)releaseHold();$('mic').classList.toggle('on',on);$('micL').textContent=label||(on?'Mic open — listening':'Open mic')}
+/* ===== open mic ===== */
+let micOn=false,consumed=0;
+function micUI(on,label){$('mic').classList.toggle('on',on);$('micL').textContent=label||(on?'Mic open — listening':'Open mic')}
 function handleAlts(alts){
   const base=alts[0]||'';$('live').textContent=base?'“'+base.trim()+'”':'';
   const toks=base.match(/\S+/g)||[];if(toks.length<=consumed)return;
   if(speaking||performance.now()<ignoreUntil){consumed=toks.length;return}
   for(const a of alts){const t=(a.match(/\S+/g)||[]).slice(consumed);for(let i=t.length-1;i>=0;i--){const g=parseTok(t[i]);if(g&&g!=='BAD'){consumed=Math.max(toks.length,consumed+1);answer(g);return}}}
   if(busy||!running)consumed=toks.length}
-function micStart(){
+
+/* engine 1: the phone's own speech service (Web Speech API) */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null,lastIdx=-1,restarts=0,lastStart=0;
+function srStart(){
   rec=new SR();rec.lang='en-US';rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=5;
   consumed=0;lastIdx=-1;lastStart=Date.now();
   rec.onstart=()=>micUI(true);
   rec.onresult=e=>{const i=e.results.length-1,r=e.results[i];if(i!==lastIdx){lastIdx=i;consumed=0}
     handleAlts(Array.from(r).map(x=>x.transcript));restarts=0};
   rec.onerror=ev=>{const c=ev.error;
-    if(c==='not-allowed'||c==='service-not-allowed'){micOn=false;micUI(false);$('err').textContent='Microphone blocked. Allow it for this site in Chrome → Site settings → Microphone, then reload.'}
-    else if(c==='audio-capture'){const held=!!hold;micOn=false;micUI(false);$('err').textContent=held?'This phone won’t let speech recognition share the mic. Set Settings → Mic back to Phone default.':'No microphone found, or another app is using it.'}
+    if(c==='not-allowed'||c==='service-not-allowed'){micOn=false;micUI(false);$('err').textContent='Microphone blocked. Allow it for this site in the browser’s Site settings → Microphone, then reload.'}
+    else if(c==='audio-capture'){micOn=false;micUI(false);$('err').textContent='No microphone found, or another app is using it.'}
     else if(c==='network'){$('err').textContent='Speech recognition needs an internet connection. Retrying…'}};
   rec.onend=()=>{if(!micOn){micUI(false);return}
     if(Date.now()-lastStart<1000)restarts++;
     if(restarts>5){micOn=false;micUI(false);$('err').textContent='The mic keeps closing. Tap Open mic to try again.';return}
-    setTimeout(()=>{if(micOn)try{micStart()}catch(e){micOn=false;micUI(false)}},restarts?600:100)};
-  const tr=hold&&hold.getAudioTracks()[0];
-  try{if(tr&&tr.readyState==='live'&&!/Android/i.test(navigator.userAgent))rec.start(tr);else rec.start()}catch(e){try{rec.start()}catch(e2){}}
+    setTimeout(()=>{if(micOn&&cfg.engine!=='offline')try{srStart()}catch(e){micOn=false;micUI(false)}},restarts?600:100)};
+  try{rec.start()}catch(e){}
 }
-if(!SR){$('mic').hidden=true;$('micNote').textContent='This browser has no speech recognition. Use Chrome on Android or a computer.'}
-else if(!window.isSecureContext){$('mic').hidden=true;$('micNote').textContent='The mic needs this page served over https:// (or localhost).'}
-else $('micNote').innerHTML='Tap <b>Open mic</b> once and keep talking — it reopens by itself after pauses. Headphones help, so the mic doesn’t hear the tone.';
+function srStop(){try{rec&&rec.stop()}catch(e){}}
+
+/* engine 2: offline Vosk recogniser on a mic the page picks itself */
+const VOSK_JS='https://cdn.jsdelivr.net/npm/vosk-browser@0.0.8/dist/vosk.js';
+const MODEL_URL='https://raw.githubusercontent.com/ccoreilly/vosk-browser/gh-pages/models/vosk-model-small-en-us-0.15.tar.gz';
+const GRAMMAR=['alpha','alfa','bravo','charlie','delta','echo','foxtrot','golf','hotel','india','juliet','kilo','lima','mike','november','oscar','papa','quebec','romeo','sierra','tango','uniform','victor','whiskey','x ray','yankee','zulu',
+  'zero','one','two','three','four','five','six','seven','eight','nine','niner','stop','comma','question','slash','break','nope','no','pass','skip','[unk]'];
+const BT=/bluetooth|buds|airpods|hands-?free|\bsco\b/i;
+let voskModel=null,voskLoading=null,vStream=null,vSrc=null,vProc=null,vMute=null,vRec=null;
+function loadScript(src){return new Promise((res,rej)=>{if(window.Vosk)return res();const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('script'));document.head.appendChild(s)})}
+async function getModel(){
+  if(voskModel)return voskModel;
+  if(!voskLoading)voskLoading=(async()=>{
+    micUI(true,'Loading recogniser…');await loadScript(VOSK_JS);
+    micUI(true,'Loading speech model…');$('micSrc').textContent='First time only: downloading the 40 MB speech model. Later visits load it from this phone.';
+    voskModel=await Vosk.createModel(MODEL_URL);return voskModel})().catch(e=>{voskLoading=null;throw e});
+  return voskLoading}
+async function listMics(){
+  try{const d=(await navigator.mediaDevices.enumerateDevices()).filter(x=>x.kind==='audioinput');
+    const sel=$('micDev'),keep=cfg.micId;sel.innerHTML='<option value="">Auto (earbuds if found)</option>'+d.map((x,i)=>`<option value="${x.deviceId}">${(x.label||'Microphone '+(i+1)).replace(/</g,'')}</option>`).join('');
+    sel.value=d.some(x=>x.deviceId===keep)?keep:'';return d}catch(e){return []}}
+async function openStream(id){return navigator.mediaDevices.getUserMedia({audio:Object.assign({echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1},id?{deviceId:{exact:id}}:{})})}
+async function voskStart(){
+  const model=await getModel();if(!micOn)return;
+  micUI(true,'Opening mic…');
+  let s;
+  if(cfg.micId){try{s=await openStream(cfg.micId)}catch(e){s=null}}
+  if(!s){s=await openStream(null);const d=await listMics();
+    if(!cfg.micId){const bt=d.find(x=>BT.test(x.label));const curLabel=(s.getAudioTracks()[0]||{}).label||'';
+      if(bt&&!BT.test(curLabel)){try{const s2=await openStream(bt.deviceId);s.getTracks().forEach(t=>t.stop());s=s2}catch(e){}}}}
+  else listMics();
+  if(!micOn){s.getTracks().forEach(t=>t.stop());return}
+  vStream=s;const ac=audio();
+  vRec=new model.KaldiRecognizer(ac.sampleRate,JSON.stringify(GRAMMAR));
+  vRec.on('partialresult',m=>handleAlts([(m.result&&m.result.partial)||'']));
+  vRec.on('result',m=>{handleAlts([(m.result&&m.result.text)||'']);consumed=0});
+  vSrc=ac.createMediaStreamSource(s);vProc=ac.createScriptProcessor(4096,1,1);vMute=ac.createGain();vMute.gain.value=0;
+  vProc.onaudioprocess=e=>{if(micOn&&vRec)try{vRec.acceptWaveform(e.inputBuffer)}catch(err){}};
+  vSrc.connect(vProc);vProc.connect(vMute);vMute.connect(ac.destination);
+  consumed=0;micUI(true);
+  $('micSrc').textContent='Listening on: '+(((s.getAudioTracks()[0]||{}).label)||'default mic');
+  s.getAudioTracks()[0].onended=()=>{if(micOn){micOn=false;voskStop();micUI(false);$('err').textContent='The mic was disconnected.'}}}
+function voskStop(){
+  try{vProc&&(vProc.onaudioprocess=null);vSrc&&vSrc.disconnect();vProc&&vProc.disconnect();vMute&&vMute.disconnect()}catch(e){}
+  try{vRec&&vRec.remove()}catch(e){}
+  if(vStream)vStream.getTracks().forEach(t=>t.stop());vStream=vSrc=vProc=vMute=vRec=null;$('micSrc').textContent=''}
+
+/* wiring */
+function micNote(){
+  if(cfg.engine==='offline'){$('mic').hidden=!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.isSecureContext);
+    $('micNote').innerHTML='Offline recogniser: listens only for phonetic words, numbers and “nope”. Choose the mic in Settings → Mic input.';return}
+  if(!SR){$('mic').hidden=true;$('micNote').textContent='This browser has no speech service. Switch Settings → Recogniser to Offline.';return}
+  if(!window.isSecureContext){$('mic').hidden=true;$('micNote').textContent='The mic needs this page served over https:// (or localhost).';return}
+  $('mic').hidden=false;$('micNote').innerHTML='Tap <b>Open mic</b> once and keep talking — it reopens by itself after pauses. Headphones help, so the mic doesn’t hear the tone.'}
+function stopMic(){micOn=false;srStop();voskStop();micUI(false);$('live').textContent=''}
 $('mic').onclick=async()=>{$('err').textContent='';audio();
-  if(micOn){micOn=false;try{rec&&rec.stop()}catch(e){}micUI(false);$('live').textContent='';return}
+  if(micOn){stopMic();return}
   micOn=true;restarts=0;micUI(true,'Requesting mic…');
-  if(cfg.btmic&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){try{await acquireHold()}catch(e){$('err').textContent='Couldn’t open the earbud mic ('+(e.name||e)+'). Using the default mic.'}}
-  if(micOn)micStart()};
+  if(cfg.engine==='offline'){try{await voskStart()}catch(e){const was=micOn;stopMic();if(was)$('err').textContent=(e&&e.name==='NotAllowedError')?'Microphone blocked. Allow it for this site in the browser’s Site settings → Microphone.':(e&&e.name==='OverconstrainedError'||e&&e.name==='NotFoundError')?'That mic isn’t available. Pick another in Settings → Mic input.':'Couldn’t start the offline recogniser ('+((e&&(e.message||e.name))||e)+').'}}
+  else srStart()};
+$('engine').addEventListener('change',()=>{const was=micOn;if(micOn)stopMic();cfg.engine=$('engine').value;$('micDevRow').hidden=cfg.engine!=='offline';save();micNote();if(cfg.engine==='offline')listMics();if(was)$('err').textContent='Recogniser changed. Tap Open mic again.'});
+$('micDev').addEventListener('change',()=>{cfg.micId=$('micDev').value;save();if(micOn&&cfg.engine==='offline')$('err').textContent='Tap the mic off and on again to switch inputs.'});
+if(navigator.mediaDevices&&navigator.mediaDevices.addEventListener)navigator.mediaDevices.addEventListener('devicechange',()=>{if(cfg.engine==='offline')listMics()});
+micNote();if(cfg.engine==='offline')listMics();
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)pause()});
 </script>
 </body>
