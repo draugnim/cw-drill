@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;500;600;700;800&family=Onest:wght@600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="icon" type="image/svg+xml" href="./img/logo.svg">
 <script>try{var o=JSON.parse(localStorage.getItem('cw-drill-v1')||'{}');if(o.theme==='dark')document.documentElement.dataset.theme='dark'}catch(e){}</script>
-<link rel="stylesheet" href="./style.css?v=5">
+<link rel="stylesheet" href="./style.css?v=6">
 </head>
 <body>
 <div class="wrap">
@@ -19,6 +19,7 @@
   <div class="hside">
     <div class="hctl">
       <div class="langs" id="langs" role="group" aria-label="Language"><button data-lang="sr">LAT</button><span>·</span><button data-lang="sr-Cyrl">ЋИР</button><span>·</span><button data-lang="en">ENG</button></div>
+      <button class="themeBtn helpBtn" id="helpBtn" data-i18n-title="howTo">?</button>
       <button class="themeBtn" id="themeBtn"><svg viewBox="0 0 24 24" id="themeIcon"></svg></button>
     </div>
     <div class="sync" id="sync"></div>
@@ -99,9 +100,12 @@
       <thead><tr><th data-i18n="hSent"></th><th data-i18n="hYou"></th><th data-i18n="hResult"></th><th class="r" data-i18n="hTime"></th></tr></thead><tbody id="histBody"></tbody></table>
     <button class="danger" id="histClear"></button>
   </details>
-  <div class="keys" data-i18n-html="help"></div>
+  <details class="guide" id="helpBox">
+    <summary><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17.5v.01"/></svg><span data-i18n="howTo"></span></summary>
+    <div class="gbody" data-i18n-html="guide"></div>
+  </details>
 </div>
 </div>
-<script type="module" src="./js/app.js?v=5"></script>
+<script type="module" src="./js/app.js?v=6"></script>
 </body>
 </html>
