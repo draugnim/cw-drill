@@ -81,6 +81,16 @@ select{background:var(--bg);color:var(--text);border:1px solid var(--line2);bord
 .danger.arm{background:var(--red-d)}
 .keys{font-size:11px;color:var(--dim);margin-top:14px;font-family:var(--mono);line-height:1.8}
 kbd{border:1px solid var(--line2);border-radius:4px;padding:0 5px;color:var(--muted)}
+.hist{margin-top:14px}
+.hist table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px;margin-top:10px}
+.hist th{font-weight:500;color:var(--muted);text-align:left;font-size:11px;padding:4px 6px;border-bottom:1px solid var(--line)}
+.hist td{padding:6px;border-bottom:1px solid var(--line);vertical-align:top;overflow:hidden;text-overflow:ellipsis}
+.hist td.c{font-family:var(--mono);font-weight:600}
+.hist .raw{display:block;font-family:var(--mono);font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist .r{font-family:var(--mono);text-align:right}
+.hist tr.ok .res{color:var(--green)}.hist tr.slow .res{color:var(--amber)}.hist tr.bad .res{color:var(--red)}
+.hist .sum{font-size:12px;color:var(--muted);margin-top:8px}
+.hist .empty{font-size:13px;color:var(--dim);padding:10px 0}
 @media (max-width:420px){.big{font-size:72px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
@@ -138,6 +148,13 @@ kbd{border:1px solid var(--line2);border-radius:4px;padding:0 5px;color:var(--mu
     <div class="set" id="micDevRow"><label for="micDev">Mic input</label><select id="micDev"><option value="">Auto (earbuds if found)</option></select></div>
     <button class="danger" id="resetB">Reset progress for this character set</button>
   </details>
+  <details class="hist" id="histBox">
+    <summary><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><path d="M3.05 11a9 9 0 1 1 .5 4"/><path d="M3 4v7h7"/></svg>History (last 100)</summary>
+    <div class="sum" id="histSum"></div>
+    <table><colgroup><col style="width:30%"><col style="width:40%"><col style="width:15%"><col style="width:15%"></colgroup>
+      <thead><tr><th>Sent</th><th>You said</th><th>Result</th><th class="r">Time</th></tr></thead><tbody id="histBody"></tbody></table>
+    <button class="danger" id="histClear">Clear history</button>
+  </details>
   <div class="keys">Keys (outside the text box): <kbd>Space</kbd> start/pause · <kbd>R</kbd> replay · <kbd>N</kbd> nope · <kbd>M</kbd> mic</div>
 </div>
 </div>
@@ -154,7 +171,7 @@ const LOOKUP={};for(const k in NATO)LOOKUP[NATO[k].toUpperCase().replace(/[^A-Z]
 const NUMW={ZERO:'0',ONE:'1',TWO:'2',THREE:'3',FOUR:'4',FIVE:'5',SIX:'6',SEVEN:'7',EIGHT:'8',NINE:'9'};Object.assign(LOOKUP,NUMW);
 
 const $=id=>document.getElementById(id);
-const DEF={order:'koch',wpm:22,hz:600,vol:50,slow:3,unlock:80,engine:'browser',micId:'',prog:{}};
+const DEF={order:'koch',wpm:22,hz:600,vol:50,slow:3,unlock:80,engine:'browser',micId:'',hist:[],prog:{}};
 let cfg=JSON.parse(JSON.stringify(DEF)),ts=0;
 let ctx=null,osc=null,gain=null,cur=null,busy=false,running=false,playEnd=0,timer=null,ledTimers=[];
 let sess={ok:0,n:0,streak:0};
@@ -196,14 +213,16 @@ function say(text,cb){
     speaking=true;speechSynthesis.speak(u);setTimeout(fin,4000)}catch(e){speaking=false;schedule(cb,2000)}}
 function introNew(nc,cb){if(!running)return;setBig(nc,'');$('pat').textContent=patHTML(nc);play(nc);schedule(cb,2600)}
 
-function answer(g){if(!running||busy||!cur)return false;busy=true;$('err').textContent='';
+function answer(g,raw){if(!running||busy||!cur)return false;busy=true;$('err').textContent='';
   const p=prog(),st=p.S[cur],dt=Math.max(0,(performance.now()-playEnd)/1000);st.a++;sess.n++;const wrong=g!==cur,was=cur;
-  if(!wrong){const fast=dt<=cfg.slow;st.ok++;sess.ok++;sess.streak++;st.s+=(1-st.s)*(fast?0.32:0.1);
+  let fast=true;
+  if(!wrong){fast=dt<=cfg.slow;st.ok++;sess.ok++;sess.streak++;st.s+=(1-st.s)*(fast?0.32:0.1);
     setBig(cur,'ok');$('pat').textContent=patHTML(cur);
     $('msg').innerHTML=fast?`<b>${NATO[cur]}</b> — correct`:`<b>${NATO[cur]}</b> — correct, but slow (${dt.toFixed(1)} s)`;
   }else{st.s*=0.45;sess.streak=0;setBig(cur,'bad');$('pat').textContent=patHTML(cur);
     $('msg').innerHTML=(g==='NOPE'?'It was ':`Not ${NATO[g]||g}. It was `)+`<b>${NATO[cur]}</b>`}
   st.s=Math.min(1,Math.max(0,st.s));
+  cfg.hist.push({c:was,g,ok:!wrong,slow:!wrong&&!fast,dt:Math.round(dt*10)/10,raw:String(raw||'').trim().slice(0,40),at:Date.now()});if(cfg.hist.length>100)cfg.hist=cfg.hist.slice(-100);renderHist();
   const nc=maybeUnlock();if(nc)$('msg').innerHTML+=` · <span style="color:var(--amber)">New character: <b>${nc}</b> ${NATO[nc]}</span>`;
   $('state').textContent='';render();save();
   const after=()=>nc?introNew(nc,next):schedule(next,wrong?600:0);
@@ -220,16 +239,26 @@ function render(){const p=prog(),o=seq();
   const weak=p.active.filter(c=>p.S[c].a>0&&p.S[c].s<0.6).sort((a,b)=>p.S[a].s-p.S[b].s).slice(0,5);
   $('weak').innerHTML=weak.length?'Drilling most: '+weak.map(c=>`<b>${c}</b> ${NATO[c]}`).join(' · '):''}
 
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function renderHist(){const H=cfg.hist||[];
+  if(!H.length){$('histBody').innerHTML='<tr><td colspan="4" class="empty">No answers yet.</td></tr>';$('histSum').textContent='';return}
+  $('histBody').innerHTML=H.slice().reverse().map(x=>{const cls=x.ok?(x.slow?'slow':'ok'):'bad',you=x.g==='NOPE'?'nope':(NATO[x.g]||x.g);
+    return `<tr class="${cls}"><td class="c">${esc(x.c)} <span style="font-family:var(--sans);font-weight:400;color:var(--muted)">${esc(NATO[x.c]||'')}</span></td><td>${esc(you)}${x.raw?`<span class="raw">“${esc(x.raw)}”</span>`:''}</td><td class="res">${x.ok?(x.slow?'slow':'✓'):'✗'}</td><td class="r">${x.dt}s</td></tr>`}).join('');
+  const ok=H.filter(x=>x.ok).length,miss={};H.forEach(x=>{if(!x.ok)miss[x.c]=(miss[x.c]||0)+1});
+  const top=Object.entries(miss).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([c,n])=>c+' ×'+n).join(', ');
+  $('histSum').textContent=`${H.length} answers · ${Math.round(100*ok/H.length)}% correct`+(top?` · most missed: ${top}`:'')}
+let histArm;$('histClear').onclick=()=>{const b=$('histClear');if(!b.classList.contains('arm')){b.classList.add('arm');b.textContent='Tap again to clear';histArm=setTimeout(()=>{b.classList.remove('arm');b.textContent='Clear history'},3000);return}
+  clearTimeout(histArm);b.classList.remove('arm');b.textContent='Clear history';cfg.hist=[];renderHist();save()};
 function start(){audio();running=true;$('startL').textContent='Pause';$('start').querySelector('svg').innerHTML='<path d="M8 5v14M16 5v14"/>';next()}
 function pause(){running=false;clearTimeout(timer);try{speechSynthesis.cancel()}catch(e){}speaking=false;stopTone();busy=false;$('startL').textContent='Start';$('start').querySelector('svg').innerHTML='<path d="M7 4v16l13-8z"/>';$('state').textContent='paused';$('msg').innerHTML='Paused. Press <b>Start</b> to continue.';render()}
 $('start').onclick=()=>running?pause():start();
 $('rep').onclick=()=>{if(!cur){$('err').textContent='Press Start first.';return}play(cur)};
-$('nope').onclick=()=>{if(!running){$('err').textContent='Press Start first.';return}answer('NOPE')};
+$('nope').onclick=()=>{if(!running){$('err').textContent='Press Start first.';return}answer('NOPE','Nope button')};
 
 /* typed / keyboard-dictated input */
 let proc=0;
-$('ans').addEventListener('input',()=>{$('err').textContent='';const v=$('ans').value;if(v.length<proc)proc=v.length;const g=findAnswer(v.slice(proc));if(g){proc=v.length;if(!answer(g)&&!running)$('err').textContent='Press Start first.'}});
-$('ans').addEventListener('keydown',e=>{if(e.key!=='Enter')return;const v=$('ans').value.slice(proc);if(!running){$('err').textContent='Press Start first.';return}const g=findAnswer(v);if(g)answer(g);else $('err').textContent='Didn’t recognise that. Try e.g. Kilo, Two, Stop, or nope.';$('ans').value='';proc=0});
+$('ans').addEventListener('input',()=>{$('err').textContent='';const v=$('ans').value;if(v.length<proc)proc=v.length;const g=findAnswer(v.slice(proc));if(g){const raw=v.slice(proc);proc=v.length;if(!answer(g,raw)&&!running)$('err').textContent='Press Start first.'}});
+$('ans').addEventListener('keydown',e=>{if(e.key!=='Enter')return;const v=$('ans').value.slice(proc);if(!running){$('err').textContent='Press Start first.';return}const g=findAnswer(v);if(g)answer(g,v);else $('err').textContent='Didn’t recognise that. Try e.g. Kilo, Two, Stop, or nope.';$('ans').value='';proc=0});
 
 /* keyboard shortcuts */
 document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.metaKey||e.ctrlKey)return;const k=e.key.toLowerCase();
@@ -245,11 +274,11 @@ let armT;$('resetB').onclick=()=>{const b=$('resetB');if(!b.classList.contains('
 
 /* persistence: this browser only */
 const LS='cw-drill-v1';
-function snapshot(){return {order:cfg.order,wpm:cfg.wpm,hz:cfg.hz,vol:cfg.vol,slow:cfg.slow,unlock:cfg.unlock,engine:cfg.engine,micId:cfg.micId,prog:cfg.prog,ts}}
-function apply(o){if(!o||typeof o!=='object')return;for(const k of ['order','wpm','hz','vol','slow','unlock','engine','micId'])if(o[k]!==undefined)cfg[k]=o[k];if(o.prog&&typeof o.prog==='object')cfg.prog=o.prog;ts=o.ts||0}
+function snapshot(){return {order:cfg.order,wpm:cfg.wpm,hz:cfg.hz,vol:cfg.vol,slow:cfg.slow,unlock:cfg.unlock,engine:cfg.engine,micId:cfg.micId,hist:cfg.hist,prog:cfg.prog,ts}}
+function apply(o){if(!o||typeof o!=='object')return;for(const k of ['order','wpm','hz','vol','slow','unlock','engine','micId'])if(o[k]!==undefined)cfg[k]=o[k];if(Array.isArray(o.hist))cfg.hist=o.hist.slice(-100);if(o.prog&&typeof o.prog==='object')cfg.prog=o.prog;ts=o.ts||0}
 function save(){ts=Date.now();try{localStorage.setItem(LS,JSON.stringify(snapshot()));$('sync').textContent='saved'}catch(e){$('sync').textContent='not saved'}}
 try{apply(JSON.parse(localStorage.getItem(LS)||'null'))}catch(e){}
-initSettings();render();
+initSettings();render();renderHist();
 
 /* ===== open mic ===== */
 let micOn=false,consumed=0;
@@ -258,7 +287,7 @@ function handleAlts(alts){
   const base=alts[0]||'';$('live').textContent=base?'“'+base.trim()+'”':'';
   const toks=base.match(/\S+/g)||[];if(toks.length<=consumed)return;
   if(speaking||performance.now()<ignoreUntil){consumed=toks.length;return}
-  for(const a of alts){const t=(a.match(/\S+/g)||[]).slice(consumed);for(let i=t.length-1;i>=0;i--){const g=parseTok(t[i]);if(g&&g!=='BAD'){consumed=Math.max(toks.length,consumed+1);answer(g);return}}}
+  for(const a of alts){const t=(a.match(/\S+/g)||[]).slice(consumed);for(let i=t.length-1;i>=0;i--){const g=parseTok(t[i]);if(g&&g!=='BAD'){consumed=Math.max(toks.length,consumed+1);answer(g,t.slice(0,i+1).join(' '));return}}}
   if(busy||!running)consumed=toks.length}
 
 /* engine 1: the phone's own speech service (Web Speech API) */
