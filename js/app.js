@@ -2,8 +2,8 @@ import {MORSE,NATO,LOOKUP,NOPE,CMD} from './data.js?v=5';
 import {createPlayer} from './morse.js?v=5';
 import {load,save as store} from './storage.js?v=5';
 import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=5';
-import {createMic,hasWebSpeech,canCapture} from './recognizer.js?v=5';
-import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=6';
+import {createMic,hasWebSpeech,canCapture} from './recognizer.js?v=8';
+import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=8';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));

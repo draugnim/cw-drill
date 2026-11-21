@@ -6,7 +6,7 @@ const VOSK_JS='https://cdn.jsdelivr.net/npm/vosk-browser@0.0.8/dist/vosk.js';
 const MODEL_URL='https://raw.githubusercontent.com/ccoreilly/vosk-browser/gh-pages/models/vosk-model-small-en-us-0.15.tar.gz';
 const GRAMMAR=['alpha','alfa','bravo','charlie','delta','echo','foxtrot','golf','hotel','india','juliet','kilo','lima','mike','november','oscar','papa','quebec','romeo','sierra','tango','uniform','victor','whiskey','x ray','yankee','zulu',
   'zero','one','two','three','four','five','six','seven','eight','nine','niner','stop','comma','question','slash','break',
-  'nope','no','pass','skip','over','done','correction','back','[unk]'];
+  'next','nope','pass','skip','over','done','correction','back','[unk]'];
 const BT=/bluetooth|buds|airpods|hands-?free|\bsco\b/i;
 
 export const hasWebSpeech=!!(window.SpeechRecognition||window.webkitSpeechRecognition);
