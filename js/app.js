@@ -1,8 +1,8 @@
-import {MORSE,NATO,LOOKUP,NOPE,CMD} from './data.js?v=2';
-import {createPlayer} from './morse.js?v=2';
-import {load,save as store} from './storage.js?v=2';
-import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=2';
-import {createMic,hasWebSpeech,canCapture} from './recognizer.js?v=2';
+import {MORSE,NATO,LOOKUP,NOPE,CMD} from './data.js?v=3';
+import {createPlayer} from './morse.js?v=3';
+import {load,save as store} from './storage.js?v=3';
+import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=3';
+import {createMic,hasWebSpeech,canCapture} from './recognizer.js?v=3';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -129,7 +129,7 @@ function pause(){running=false;clearTimeout(timer);try{speechSynthesis.cancel()}
   $('startL').textContent='Start';$('start').querySelector('svg').innerHTML='<path d="M7 4v16l13-8z"/>';$('state').textContent='paused';$('msg').innerHTML='Paused. Press <b>Start</b> to continue.';render()}
 $('start').onclick=()=>running?pause():start();
 $('rep').onclick=()=>{if(!cur){$('err').textContent='Press Start first.';return}sendCurrent()};
-$('nope').onclick=()=>{if(!running){$('err').textContent='Press Start first.';return}finish('NOPE','Nope button')};
+$('nope').onclick=()=>{if(!running){$('err').textContent='Press Start first.';return}finish('NOPE','Next button')};
 $('mic').onclick=()=>{$('err').textContent='';player.audio();if(mic.on){mic.stop();return}mic.start({engine:cfg.engine,micId:cfg.micId})};
 document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.metaKey||e.ctrlKey)return;const k=e.key.toLowerCase();
   if(k===' '){e.preventDefault();running?pause():start()}else if(k==='r')$('rep').click();else if(k==='n')$('nope').click();else if(k==='m'&&!$('mic').hidden)$('mic').click()});
@@ -139,10 +139,10 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)pa
 function render(){const p=getProg(cfg),o=sequence(cfg);
   $('grid').innerHTML=o.map(c=>{const on=p.active.includes(c),st=p.S[c],s=st.s,pct=st.a?Math.round(s*100):0;
     const col=s<0.4?'var(--red)':s<0.7?'var(--amber)':'var(--green)';
-    return `<div class="cell${on?'':' locked'}${cur&&running&&cur.text.includes(c)?' cur':''}" title="${NATO[c]}: ${st.ok}/${st.a} correct"><div class="c">${esc(c)}</div><div class="p">${on?(st.a?pct+'%':'new'):'–'}</div>${on?`<div class="bar" style="width:${Math.max(6,s*100)}%;background:${col}"></div>`:''}</div>`}).join('');
+    return `<div class="cell${on?'':' locked'}" title="${NATO[c]}: ${st.ok}/${st.a} correct"><div class="c">${esc(c)}</div><div class="p">${on?(st.a?pct+'%':'new'):'–'}</div>${on?`<div class="bar" style="width:${Math.max(6,s*100)}%;background:${col}"></div>`:''}</div>`}).join('');
   const learned=p.active.filter(c=>p.S[c].s>=cfg.unlock/100&&p.S[c].a>=4).length;
   $('sAcc').textContent=sess.n?Math.round(100*sess.ok/sess.n)+'%':'–';$('sStr').textContent=sess.streak;$('sLrn').textContent=learned+'/'+o.length;$('sN').textContent=sess.n;
-  $('setInfo').textContent=`${p.active.length} of ${o.length} in rotation`;
+  $('setInfo').textContent=`${p.active.length} of ${o.length} in rotation`;$('mSum').textContent=`${p.active.length} of ${o.length} in rotation`;
   const weak=p.active.filter(c=>p.S[c].a>0&&p.S[c].s<0.6).sort((a,b)=>p.S[a].s-p.S[b].s).slice(0,5);
   $('weak').innerHTML=weak.length?'Drilling most: '+weak.map(c=>`<b>${esc(c)}</b> ${NATO[c]}`).join(' · '):''}
 function renderHist(){const H=cfg.hist||[];
@@ -171,6 +171,7 @@ for(const id in FMT){const el=$(id);el.value=cfg[id];$(id+'O').textContent=FMT[i
     if(id==='lenMin'&&cfg.lenMin>cfg.lenMax){cfg.lenMax=cfg.lenMin;$('lenMax').value=cfg.lenMax;$('lenMaxO').textContent=cfg.lenMax}
     if(id==='lenMax'&&cfg.lenMax<cfg.lenMin){cfg.lenMin=cfg.lenMax;$('lenMin').value=cfg.lenMin;$('lenMinO').textContent=cfg.lenMin}
     $(id+'O').textContent=FMT[id](cfg[id]);persist()})}
+$('masteryBox').open=cfg.showMastery;$('masteryBox').addEventListener('toggle',()=>{cfg.showMastery=$('masteryBox').open;persist()});
 $('limit').checked=cfg.limit;$('limit').addEventListener('change',()=>{cfg.limit=$('limit').checked;persist()});
 function modeUI(){document.querySelectorAll('[data-multi]').forEach(el=>el.hidden=!multi());
   $('ans').placeholder=multi()?'Type KMRS or kilo mike, then Enter':'Or type: kilo, two, stop…';$('ans').enterKeyHint='done'}

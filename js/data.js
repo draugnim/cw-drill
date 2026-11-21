@@ -33,5 +33,8 @@ LOSE PAY MEET INCLUDE SET LEARN LEAD UNDERSTAND WATCH FOLLOW STOP CREATE SPEAK R
 RADIO ANTENNA SIGNAL BAND POWER TOWER WIRE CABLE TUNER KEY PADDLE MORSE CODE COPY SPEED TONE NOISE FADE STATION OPERATOR CONTEST LOG CARD REPORT WEATHER RAIN SUN WIND COLD WARM
 CQ DE RST QTH QSL QRZ QRM QRN QSB QRP QRO QSY QRT QRL TNX TKS FB OM YL XYL UR HR WX ES 73 88 TU AGN PSE BK KN SK ANT RIG PWR GM GA GE GN HW CPY SOLID DX TEST RPRT NR`).split(/\s+/).filter(Boolean);
 
-/* callsign prefixes, mostly Europe plus common DX */
-export const PREFIXES=['E7','T9','9A','S5','YU','4O','Z3','LZ','YO','HA','OE','OK','OM','SP','DL','DK','DJ','DM','PA','ON','F','G','M','EI','GI','EA','CT','I','IK','IZ','HB9','SM','LA','OH','OZ','ES','YL','LY','UR','UA','SV','TA','4X','W','K','N','AA','VE','JA','VK','ZL','PY','LU','ZS','VU','BY','HL'];
+/* Callsign = ITU prefix + call-area digit + suffix (1–3 letters, ends in a letter).
+   Prefixes are listed without the digit, e.g. E7 → E71ABC, S5 → S57DX, HB → HB9ABC.
+   Mostly Europe plus common DX. DIGITS restricts the digit where only some are used. */
+export const PREFIXES=['E7','9A','S5','YU','4O','Z3','LZ','YO','HA','OE','OK','OM','SP','DL','DK','DJ','DM','PA','ON','F','G','M','EI','GI','EA','CT','I','IK','IZ','HB','SM','LA','OH','OZ','ES','YL','LY','UR','UA','SV','TA','4X','W','K','N','AA','VE','JA','VK','ZL','PY','LU','ZS','VU','BY','HL'];
+export const DIGITS={HB:'9',OE:'123456789',VK:'12345678',ZL:'1234',VE:'1234567',JA:'1234567890'};

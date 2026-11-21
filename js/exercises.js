@@ -1,4 +1,4 @@
-import {KOCH,LET,DIG,FULL,WORDS,PREFIXES} from './data.js?v=2';
+import {KOCH,LET,DIG,FULL,WORDS,PREFIXES,DIGITS} from './data.js?v=3';
 
 /* ---------- per-character progress ---------- */
 export function sequence(cfg){return cfg.order==='koch'?KOCH:cfg.order==='letters'?LET:FULL}
@@ -41,13 +41,17 @@ function callsign(cfg,p){
   const act=new Set(p.active),lim=cfg.limit;
   const letters=lim?LET.filter(c=>act.has(c)):LET,digits=lim?DIG.filter(c=>act.has(c)):DIG;
   if(lim&&(letters.length<2||digits.length<1)){const c=callsign(Object.assign({},cfg,{limit:false}),p);c.note='Callsigns need letters and at least one digit, so this one uses all characters. Turn off “Only learned characters” to hide this note.';return c}
-  let pre=PREFIXES.filter(x=>!lim||[...x].every(c=>act.has(c)));
+  /* prefix (as allocated) + one call-area digit; skip prefixes whose characters or digits aren't available */
+  const usable=x=>(!lim||[...x].every(c=>act.has(c)))&&(DIGITS[x]||DIG.join('')).split('').some(d=>digits.includes(d));
+  const pre=PREFIXES.filter(usable);
   let prefix=pre.length?pre[Math.floor(Math.random()*pre.length)]:pickWeighted(letters,x=>weight(p,x));
-  if(!/\d$/.test(prefix))prefix+=pickWeighted(digits,x=>weight(p,x));
+  const ds=(DIGITS[prefix]||DIG.join('')).split('').filter(d=>digits.includes(d));
+  prefix+=pickWeighted(ds.length?ds:digits,x=>weight(p,x));
   const n=randInt(1,3),cnt={};let suf='';const cap=Math.max(1,cfg.maxSame);
   for(let i=0;i<n;i++){let o=letters.filter(c=>(cnt[c]||0)<cap);if(!o.length)o=letters;const c=pickWeighted(o,x=>weight(p,x));cnt[c]=(cnt[c]||0)+1;suf+=c}
   let s=prefix+suf;
-  if(Math.random()<0.1){const tail=['P','M','QRP'].filter(t=>!lim||[...t].every(c=>act.has(c)))[0];if(tail&&(!lim||act.has('/')))s+='/'+tail}
+  /* occasionally portable or mobile */
+  if(Math.random()<0.1){const tails=['P','M'].filter(t=>!lim||act.has(t));if(tails.length&&(!lim||act.has('/')))s+='/'+tails[Math.floor(Math.random()*tails.length)]}
   return {text:s};
 }
 export function nextItem(cfg,last){
