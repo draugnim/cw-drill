@@ -39,7 +39,7 @@ const EN={
   noteBrowser:'Tap <b>Open mic</b> once and keep talking — it reopens by itself after pauses. Headphones help, so the mic doesn’t hear the tone.',
   noteWords:'Not enough words use only your learned characters and length, so this is a random group. Learn more characters, widen the length, or turn off “Only characters in rotation”.',
   noteCalls:'Callsigns need letters and at least one digit, so this one uses all characters. Turn off “Only characters in rotation” to hide this note.',
-  language:'Language'
+  language:'Language',toDark:'Switch to dark theme',toLight:'Switch to light theme'
 };
 const SR={
   sub:'Čuj, izgovori. Slabiji znakovi se češće ponavljaju.',
@@ -80,7 +80,7 @@ const SR={
   noteBrowser:'Dodirni <b>Otvori mikrofon</b> jednom i samo pričaj — sam se ponovo otvara nakon pauza. Odgovori su na engleskom ([[Kilo, Mike, Two]]…). Slušalice pomažu da mikrofon ne čuje ton.',
   noteWords:'Nema dovoljno riječi samo od naučenih znakova i zadate dužine, pa je ovo nasumična grupa. Nauči još znakova, proširi dužinu ili isključi „Samo znakovi u vježbi“.',
   noteCalls:'Pozivnom znaku trebaju slova i bar jedna cifra, pa ovaj koristi sve znakove. Isključi „Samo znakovi u vježbi“ da sakriješ ovu napomenu.',
-  language:'Jezik'
+  language:'Jezik',toDark:'Prebaci na tamnu temu',toLight:'Prebaci na svijetlu temu'
 };
 
 /* Serbian Latin → Cyrillic. Skips HTML tags, {placeholders} and [[kept]] text. */
