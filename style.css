@@ -171,3 +171,16 @@ header{gap:12px;justify-content:flex-start}
 .guide dl{margin:0}.guide dt{font-weight:600;margin-top:8px}.guide dd{margin:2px 0 0;color:var(--muted)}
 .guide b{font-weight:600}
 [data-theme="light"] .helpBtn{font-family:var(--mono);font-size:15px;text-transform:none}
+
+/* save status at the bottom; compact header on phones */
+.sync{text-align:right;margin-top:12px;font-size:11px}
+@media (max-width:560px){
+  header{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"ctl ctl" "logo text";column-gap:10px;row-gap:12px;align-items:center}
+  .hside{display:contents}
+  .hctl{grid-area:ctl;justify-content:flex-start;padding-bottom:10px;border-bottom:1px solid var(--line)}
+  .hctl #helpBtn{margin-left:auto}
+  .logo{grid-area:logo;height:46px}
+  .htext{grid-area:text}
+  h1,[data-theme="light"] h1{font-size:17px;white-space:nowrap}
+  .sub{font-size:11.5px;line-height:1.35;margin-top:3px}
+}
