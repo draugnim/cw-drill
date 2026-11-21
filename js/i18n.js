@@ -39,7 +39,28 @@ const EN={
   noteBrowser:'Tap <b>Open mic</b> once and keep talking — it reopens by itself after pauses. Headphones help, so the mic doesn’t hear the tone.',
   noteWords:'Not enough words use only your learned characters and length, so this is a random group. Learn more characters, widen the length, or turn off “Only characters in rotation”.',
   noteCalls:'Callsigns need letters and at least one digit, so this one uses all characters. Turn off “Only characters in rotation” to hide this note.',
-  language:'Language',toDark:'Switch to dark theme',toLight:'Switch to light theme'
+  language:'Language',toDark:'Switch to dark theme',toLight:'Switch to light theme',
+  howTo:'How to use',
+  guide:'<h3>Basics</h3><p>Press <b>Start</b>. The app sends Morse; answer by saying the phonetic name (Kilo, Mike, Two, Stop…). If you can’t copy it, say <b>nope</b> (or no, pass, skip, next) or tap <b>Next</b>: it counts as a miss, the answer is read out and the next one is sent. <b>Replay</b> sends the current item again.</p>'+
+    '<p>Tap <b>Open mic</b> once and it stays open. You can also type in the box instead of speaking.</p>'+
+    '<h3>Exercise types</h3><ul><li><b>Single characters</b> — one character at a time, answered with one word.</li><li><b>Random groups</b> — random groups made from your characters.</li><li><b>Words</b> — common English words.</li><li><b>Callsigns</b> — realistic calls: a real ITU prefix, call-area digit and 1–3 letter suffix, sometimes /P or /M.</li></ul>'+
+    '<p>For groups, words and callsigns, spell the answer letter by letter. It is checked once you have given as many characters as were sent. Say <b>over</b> (or done) to check early, <b>correction</b> (or back, delete) to remove the last letter. Typing: KM or kilo mike, then Enter.</p>'+
+    '<h3>How it adapts</h3><p>Every character has a mastery score. Misses lower it, correct answers raise it, fast ones more than slow ones. Weak characters are picked more often. In <b>Koch order</b> you start with K and M; the next character unlocks when every character in rotation reaches the <b>Unlock at</b> level (with at least 4 attempts each). The <b>Mastery</b> panel shows the scores: red weak, amber improving, green solid. It is closed by default so it doesn’t give answers away.</p>'+
+    '<h3>Settings</h3><dl>'+
+    '<dt>Character set</dt><dd>Koch order (unlocks gradually), all letters, or letters, numbers and punctuation (all at once).</dd>'+
+    '<dt>Shortest / Longest</dt><dd>Length range for groups and words.</dd>'+
+    '<dt>Same char max</dt><dd>How many times one character may appear in a group, word or callsign.</dd>'+
+    '<dt>Learned only</dt><dd>Groups, words and callsigns use only characters in rotation. If too few words fit, you get a random group instead.</dd>'+
+    '<dt>Speed</dt><dd>Character speed in WPM.</dd>'+
+    '<dt>Character gap / Word gap</dt><dd>Spacing in dit lengths. Standard is 3 and 7; larger values give more thinking time without slowing the characters themselves (Farnsworth).</dd>'+
+    '<dt>Send times / Repeat pause</dt><dd>Send each item several times, with this pause between sendings.</dd>'+
+    '<dt>Tone / Volume</dt><dd>Sidetone pitch and loudness.</dd>'+
+    '<dt>Slow after</dt><dd>An answer slower than this (counted from the end of sending) is correct but slow, and raises mastery less.</dd>'+
+    '<dt>Unlock at</dt><dd>Mastery needed before Koch adds the next character.</dd>'+
+    '<dt>Recogniser</dt><dd><b>Phone’s speech service</b>: the browser’s speech recognition; needs internet and uses the phone’s default mic. <b>Offline</b>: downloads a 40 MB model once, then works without internet, listens only for drill words and lets you choose the mic.</dd>'+
+    '<dt>Reset progress</dt><dd>Clears mastery for the current character set.</dd></dl>'+
+    '<h3>History</h3><p>The last 100 answers: what was sent, what you said (with the recognised text), the result and response time, plus the most-missed characters.</p>'+
+    '<h3>Tips and keys</h3><p>Use headphones so the mic doesn’t hear the tone. Settings and progress are saved in this browser only.<br>Keys (outside the text box): <kbd>Space</kbd> start/pause · <kbd>R</kbd> replay · <kbd>N</kbd> next · <kbd>M</kbd> mic</p>'
 };
 const SR={
   sub:'Čuj, izgovori. Slabiji znakovi se češće ponavljaju.',
@@ -80,7 +101,28 @@ const SR={
   noteBrowser:'Dodirni <b>Otvori mikrofon</b> jednom i samo pričaj — sam se ponovo otvara nakon pauza. Odgovori su na engleskom ([[Kilo, Mike, Two]]…). Slušalice pomažu da mikrofon ne čuje ton.',
   noteWords:'Nema dovoljno riječi samo od naučenih znakova i zadate dužine, pa je ovo nasumična grupa. Nauči još znakova, proširi dužinu ili isključi „Samo znakovi u vježbi“.',
   noteCalls:'Pozivnom znaku trebaju slova i bar jedna cifra, pa ovaj koristi sve znakove. Isključi „Samo znakovi u vježbi“ da sakriješ ovu napomenu.',
-  language:'Jezik',toDark:'Prebaci na tamnu temu',toLight:'Prebaci na svijetlu temu'
+  language:'Jezik',toDark:'Prebaci na tamnu temu',toLight:'Prebaci na svijetlu temu',
+  howTo:'Uputstvo',
+  guide:'<h3>Osnove</h3><p>Pritisni <b>Start</b>. Aplikacija šalje Morzeov kod, a ti odgovaraš izgovarajući fonetsko ime ([[Kilo, Mike, Two, Stop]]…). Ako nisi primio znak, reci <b>[[nope]]</b> (ili [[no, pass, skip, next]]) ili dodirni <b>Dalje</b>: računa se kao promašaj, odgovor se pročita naglas i šalje se sljedeći. <b>Ponovi</b> ponovo šalje trenutnu stavku.</p>'+
+    '<p>Dodirni <b>Otvori mikrofon</b> jednom i ostaje otvoren. Umjesto govora možeš i kucati u polje.</p>'+
+    '<h3>Tipovi vježbe</h3><ul><li><b>Pojedinačni znakovi</b> — jedan po jedan znak, odgovor je jedna riječ.</li><li><b>Nasumične grupe</b> — nasumične grupe od tvojih znakova.</li><li><b>Riječi</b> — časte engleske riječi.</li><li><b>Pozivni znakovi</b> — realni pozivni znakovi: stvarni [[ITU]] prefiks, cifra područja i sufiks od 1–3 slova, ponekad [[/P]] ili [[/M]].</li></ul>'+
+    '<p>Kod grupa, riječi i pozivnih znakova odgovor speluješ slovo po slovo. Provjera ide kad izgovoriš onoliko znakova koliko je poslato. Reci <b>[[over]]</b> (ili [[done]]) za raniju provjeru, <b>[[correction]]</b> (ili [[back, delete]]) da obrišeš posljednje slovo. Kucanjem: [[KM]] ili [[kilo mike]], pa [[Enter]].</p>'+
+    '<h3>Kako se prilagođava</h3><p>Svaki znak ima ocjenu savladanosti. Promašaji je spuštaju, tačni odgovori podižu, brzi više od sporih. Slabiji znakovi se biraju češće. U <b>[[Koch]]</b> redoslijedu počinješ sa [[K]] i [[M]]; sljedeći znak se otključava kad svi znakovi u vježbi dostignu nivo <b>Otključaj na</b> (uz bar 4 pokušaja po znaku). Panel <b>Savladanost</b> pokazuje ocjene: crveno slabo, narandžasto napreduje, zeleno sigurno. Podrazumijevano je zatvoren da ne otkriva odgovore.</p>'+
+    '<h3>Podešavanja</h3><dl>'+
+    '<dt>Skup znakova</dt><dd>[[Koch]] redoslijed (postepeno otključavanje), sva slova, ili slova, brojevi i interpunkcija (sve odjednom).</dd>'+
+    '<dt>Najkraće / Najduže</dt><dd>Raspon dužine za grupe i riječi.</dd>'+
+    '<dt>Isti znak najviše</dt><dd>Koliko puta se isti znak smije pojaviti u grupi, riječi ili pozivnom znaku.</dd>'+
+    '<dt>Samo naučeni</dt><dd>Grupe, riječi i pozivni znakovi koriste samo znakove u vježbi. Ako nema dovoljno takvih riječi, dobiješ nasumičnu grupu.</dd>'+
+    '<dt>Brzina</dt><dd>Brzina znakova u [[WPM]].</dd>'+
+    '<dt>Razmak znakova / Razmak riječi</dt><dd>Razmak u dužinama tačke. Standard je 3 i 7; veće vrijednosti daju više vremena za razmišljanje bez usporavanja samih znakova ([[Farnsworth]]).</dd>'+
+    '<dt>Broj slanja / Pauza ponavljanja</dt><dd>Svaka stavka se šalje više puta, sa ovom pauzom između.</dd>'+
+    '<dt>Ton / Jačina</dt><dd>Visina i glasnoća tona.</dd>'+
+    '<dt>Sporo nakon</dt><dd>Odgovor sporiji od ovoga (računa se od kraja slanja) je tačan, ali spor, i manje podiže savladanost.</dd>'+
+    '<dt>Otključaj na</dt><dd>Savladanost potrebna da [[Koch]] doda sljedeći znak.</dd>'+
+    '<dt>Prepoznavanje</dt><dd><b>Govorni servis telefona</b>: prepoznavanje govora u pretraživaču; traži internet i koristi podrazumijevani mikrofon telefona. <b>Oflajn</b>: jednom preuzme model od [[40 MB]], zatim radi bez interneta, sluša samo riječi iz vježbe i dozvoljava izbor mikrofona.</dd>'+
+    '<dt>Poništi napredak</dt><dd>Briše savladanost za trenutni skup znakova.</dd></dl>'+
+    '<h3>Istorija</h3><p>Posljednjih 100 odgovora: šta je poslato, šta si rekao (uz prepoznati tekst), rezultat i vrijeme odgovora, te najčešće promašeni znakovi.</p>'+
+    '<h3>Savjeti i tasteri</h3><p>Koristi slušalice da mikrofon ne čuje ton. Podešavanja i napredak se čuvaju samo u ovom pretraživaču.<br>Tasteri (van polja za unos): <kbd>[[Space]]</kbd> start/pauza · <kbd>[[R]]</kbd> ponovi · <kbd>[[N]]</kbd> dalje · <kbd>[[M]]</kbd> mikrofon</p>'
 };
 
 /* Serbian Latin → Cyrillic. Skips HTML tags, {placeholders} and [[kept]] text. */

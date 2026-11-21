@@ -3,7 +3,7 @@ import {createPlayer} from './morse.js?v=5';
 import {load,save as store} from './storage.js?v=5';
 import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=5';
 import {createMic,hasWebSpeech,canCapture} from './recognizer.js?v=5';
-import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=5';
+import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=6';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -209,6 +209,8 @@ function relabel(){
 }
 function langUI(){document.querySelectorAll('#langs button').forEach(b=>b.classList.toggle('on',b.dataset.lang===getLang()))}
 document.querySelectorAll('#langs button').forEach(b=>b.onclick=()=>{cfg.lang=b.dataset.lang;setLang(cfg.lang);persist();relabel()});
+
+$('helpBtn').onclick=()=>{$('helpBox').open=true;$('helpBox').scrollIntoView({behavior:'smooth',block:'start'})};
 
 /* ---------- theme ---------- */
 const SUN='<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
