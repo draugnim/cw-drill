@@ -1,0 +1,78 @@
+import {KOCH,LET,DIG,FULL,WORDS,PREFIXES} from './data.js?v=2';
+
+/* ---------- per-character progress ---------- */
+export function sequence(cfg){return cfg.order==='koch'?KOCH:cfg.order==='letters'?LET:FULL}
+export function getProg(cfg){
+  let p=cfg.prog[cfg.order];
+  if(!p){const o=sequence(cfg);p={active:cfg.order==='koch'?o.slice(0,2):o.slice(),S:{}};cfg.prog[cfg.order]=p}
+  FULL.forEach(c=>{if(!p.S[c])p.S[c]={s:0.3,a:0,ok:0}});
+  return p;
+}
+const weight=(p,c)=>Math.pow(1-(p.S[c]?p.S[c].s:0.3),2)+0.04;
+function pickWeighted(items,wf){const w=items.map(wf),tot=w.reduce((a,b)=>a+b,0);let r=Math.random()*tot;
+  for(let i=0;i<items.length;i++){r-=w[i];if(r<=0)return items[i]}return items[items.length-1]}
+const randInt=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+function lengthRange(cfg){const a=Math.max(1,Math.min(cfg.lenMin,cfg.lenMax)),b=Math.max(cfg.lenMin,cfg.lenMax);return [a,b]}
+function maxRepeat(s){const n={};let m=0;for(const c of s){n[c]=(n[c]||0)+1;m=Math.max(m,n[c])}return m}
+
+/* ---------- generators: each returns {text, note?} ---------- */
+function chars(cfg,p,last){
+  const a=p.active;let c=pickWeighted(a,x=>weight(p,x));
+  if(c===last&&a.length>2)c=pickWeighted(a,x=>weight(p,x));
+  return {text:c};
+}
+function group(cfg,p,pool){
+  pool=pool||p.active;const [a,b]=lengthRange(cfg),n=randInt(a,b),cnt={};let s='';
+  const cap=Math.max(1,cfg.maxSame);
+  for(let i=0;i<n;i++){
+    let options=pool.filter(c=>(cnt[c]||0)<cap);if(!options.length)options=pool;
+    const c=pickWeighted(options,x=>weight(p,x));cnt[c]=(cnt[c]||0)+1;s+=c}
+  return {text:s};
+}
+function words(cfg,p,last){
+  const [a,b]=lengthRange(cfg),act=new Set(p.active);
+  const list=[...new Set(WORDS)].filter(w=>w.length>=a&&w.length<=b&&maxRepeat(w)<=Math.max(1,cfg.maxSame)&&(!cfg.limit||[...w].every(c=>act.has(c)))&&w!==last);
+  if(list.length<5){const g=group(cfg,p);g.note='Not enough words use only your learned characters and length, so this is a random group. Learn more characters, widen the length, or turn off “Only learned characters”.';return g}
+  /* sample a few, keep the one with the most weak characters */
+  const cand=Array.from({length:6},()=>list[Math.floor(Math.random()*list.length)]);
+  return {text:pickWeighted(cand,w=>[...w].reduce((s,c)=>s+weight(p,c),0)/w.length)};
+}
+function callsign(cfg,p){
+  const act=new Set(p.active),lim=cfg.limit;
+  const letters=lim?LET.filter(c=>act.has(c)):LET,digits=lim?DIG.filter(c=>act.has(c)):DIG;
+  if(lim&&(letters.length<2||digits.length<1)){const c=callsign(Object.assign({},cfg,{limit:false}),p);c.note='Callsigns need letters and at least one digit, so this one uses all characters. Turn off “Only learned characters” to hide this note.';return c}
+  let pre=PREFIXES.filter(x=>!lim||[...x].every(c=>act.has(c)));
+  let prefix=pre.length?pre[Math.floor(Math.random()*pre.length)]:pickWeighted(letters,x=>weight(p,x));
+  if(!/\d$/.test(prefix))prefix+=pickWeighted(digits,x=>weight(p,x));
+  const n=randInt(1,3),cnt={};let suf='';const cap=Math.max(1,cfg.maxSame);
+  for(let i=0;i<n;i++){let o=letters.filter(c=>(cnt[c]||0)<cap);if(!o.length)o=letters;const c=pickWeighted(o,x=>weight(p,x));cnt[c]=(cnt[c]||0)+1;suf+=c}
+  let s=prefix+suf;
+  if(Math.random()<0.1){const tail=['P','M','QRP'].filter(t=>!lim||[...t].every(c=>act.has(c)))[0];if(tail&&(!lim||act.has('/')))s+='/'+tail}
+  return {text:s};
+}
+export function nextItem(cfg,last){
+  const p=getProg(cfg);
+  switch(cfg.mode){
+    case 'groups':return group(cfg,p);
+    case 'words':return words(cfg,p,last);
+    case 'calls':return callsign(cfg,p);
+    default:return chars(cfg,p,last);
+  }
+}
+
+/* ---------- scoring ---------- */
+/* given: string the user spelled, or 'NOPE'. Updates per-character mastery. */
+export function score(cfg,target,given,fast){
+  const p=getProg(cfg),single=target.length===1;
+  [...target].forEach((ch,i)=>{
+    const st=p.S[ch];if(!st)return;st.a++;
+    if(given!=='NOPE'&&given[i]===ch){st.ok++;st.s+=(1-st.s)*(single?(fast?0.32:0.1):(fast?0.2:0.08))}
+    else st.s*=single?0.45:(given==='NOPE'?0.6:0.5);
+    st.s=Math.min(1,Math.max(0,st.s));
+  });
+}
+export function maybeUnlock(cfg){
+  const p=getProg(cfg),o=sequence(cfg);if(p.active.length>=o.length)return null;const th=cfg.unlock/100;
+  if(p.active.every(c=>p.S[c].s>=th&&p.S[c].a>=4)){const nc=o[p.active.length];p.active.push(nc);p.S[nc].s=0.15;return nc}
+  return null;
+}
