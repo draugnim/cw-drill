@@ -1,6 +1,6 @@
 /* Two speech engines with one interface:
    onPhrase({id, text, alts, final}) — text so far for the current phrase (replaces the last one with the same id)
-   onState(on, label) · onError(message) · onSource(label) */
+   onState(on, labelKey) · onError(key, params) · onSource(key, params) — keys are looked up in i18n.js */
 
 const VOSK_JS='https://cdn.jsdelivr.net/npm/vosk-browser@0.0.8/dist/vosk.js';
 const MODEL_URL='https://raw.githubusercontent.com/ccoreilly/vosk-browser/gh-pages/models/vosk-model-small-en-us-0.15.tar.gz';
@@ -25,12 +25,12 @@ export function createMic({onPhrase,onState,onError,onSource,audio}){
     rec.onresult=e=>{const i=e.results.length-1,r=e.results[i];if(i!==lastIdx){lastIdx=i;phraseId++}
       onPhrase({id:phraseId,text:r[0].transcript,alts:Array.from(r).map(x=>x.transcript),final:r.isFinal});restarts=0};
     rec.onerror=ev=>{const c=ev.error;
-      if(c==='not-allowed'||c==='service-not-allowed'){on=false;onState(false);onError('Microphone blocked. Allow it for this site in the browser’s Site settings → Microphone, then reload.')}
-      else if(c==='audio-capture'){on=false;onState(false);onError('No microphone found, or another app is using it.')}
-      else if(c==='network')onError('Speech recognition needs an internet connection. Retrying…')};
+      if(c==='not-allowed'||c==='service-not-allowed'){on=false;onState(false);onError('errBlockedReload')}
+      else if(c==='audio-capture'){on=false;onState(false);onError('errNoMic')}
+      else if(c==='network')onError('errNetwork')};
     rec.onend=()=>{if(!on){onState(false);return}
       if(Date.now()-lastStart<1000)restarts++;
-      if(restarts>5){on=false;onState(false);onError('The mic keeps closing. Tap Open mic to try again.');return}
+      if(restarts>5){on=false;onState(false);onError('errClosing');return}
       setTimeout(()=>{if(on&&engine==='browser')try{srStart()}catch(e){on=false;onState(false)}},restarts?600:100)};
     try{rec.start()}catch(e){}
   }
@@ -42,8 +42,8 @@ export function createMic({onPhrase,onState,onError,onSource,audio}){
   function getModel(){
     if(model)return Promise.resolve(model);
     if(!loading)loading=(async()=>{
-      onState(true,'Loading recogniser…');await loadScript(VOSK_JS);
-      onState(true,'Loading speech model…');onSource('First time only: downloading the 40 MB speech model. Later visits load it from this device.');
+      onState(true,'micLoadingRec');await loadScript(VOSK_JS);
+      onState(true,'micLoadingModel');onSource('modelDownload');
       model=await window.Vosk.createModel(MODEL_URL);return model})().catch(e=>{loading=null;throw e});
     return loading;
   }
@@ -53,7 +53,7 @@ export function createMic({onPhrase,onState,onError,onSource,audio}){
   const openStream=id=>navigator.mediaDevices.getUserMedia({audio:Object.assign({echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1},id?{deviceId:{exact:id}}:{})});
   async function voskStart(){
     const m=await getModel();if(!on)return;
-    onState(true,'Opening mic…');
+    onState(true,'micOpening');
     let s=null;
     if(micId){try{s=await openStream(micId)}catch(e){s=null}}
     if(!s){s=await openStream(null);
@@ -67,8 +67,8 @@ export function createMic({onPhrase,onState,onError,onSource,audio}){
     src=ac.createMediaStreamSource(s);proc=ac.createScriptProcessor(4096,1,1);mute=ac.createGain();mute.gain.value=0;
     proc.onaudioprocess=e=>{if(on&&vrec)try{vrec.acceptWaveform(e.inputBuffer)}catch(err){}};
     src.connect(proc);proc.connect(mute);mute.connect(ac.destination);
-    onState(true);onSource('Listening on: '+(((s.getAudioTracks()[0]||{}).label)||'default mic'));
-    s.getAudioTracks()[0].onended=()=>{if(on){on=false;voskStop();onState(false);onError('The mic was disconnected.')}};
+    onState(true);onSource('listeningOn',{x:((s.getAudioTracks()[0]||{}).label)||''});
+    s.getAudioTracks()[0].onended=()=>{if(on){on=false;voskStop();onState(false);onError('errDisconnected')}};
   }
   function voskStop(){
     try{proc&&(proc.onaudioprocess=null);src&&src.disconnect();proc&&proc.disconnect();mute&&mute.disconnect()}catch(e){}
@@ -80,12 +80,12 @@ export function createMic({onPhrase,onState,onError,onSource,audio}){
     get on(){return on},
     listMics,
     async start(opts){
-      engine=opts.engine;micId=opts.micId||'';on=true;restarts=0;onState(true,'Requesting mic…');
+      engine=opts.engine;micId=opts.micId||'';on=true;restarts=0;onState(true,'micRequesting');
       if(engine==='offline'){
         try{await voskStart()}catch(e){const was=on;this.stop();
-          if(was)onError(e&&e.name==='NotAllowedError'?'Microphone blocked. Allow it for this site in the browser’s Site settings → Microphone.':
-            (e&&(e.name==='OverconstrainedError'||e.name==='NotFoundError'))?'That mic isn’t available. Pick another in Settings → Mic input.':
-            'Couldn’t start the offline recogniser ('+((e&&(e.message||e.name))||e)+').')}
+          if(was){if(e&&e.name==='NotAllowedError')onError('errBlocked');
+            else if(e&&(e.name==='OverconstrainedError'||e.name==='NotFoundError'))onError('errMicUnavailable');
+            else onError('errOffline',{x:String((e&&(e.message||e.name))||e)})}}
       }else srStart();
     },
     stop(){on=false;srStop();voskStop();onState(false)}

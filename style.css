@@ -94,3 +94,8 @@ kbd{border:1px solid var(--line2);border-radius:4px;padding:0 5px;color:var(--mu
 .mastery{margin-top:0}
 .mastery .msum{margin-left:auto;color:var(--dim);font-size:12px}
 .mastery[open] .msum{display:none}
+header{gap:12px;justify-content:flex-start}
+.logo{height:64px;width:auto;flex:none}
+.htext{flex:1;min-width:0}
+.hside{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+#lang{height:28px;font-size:12px;padding:0 6px;font-family:var(--mono)}

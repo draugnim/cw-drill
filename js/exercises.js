@@ -1,4 +1,4 @@
-import {KOCH,LET,DIG,FULL,WORDS,PREFIXES,DIGITS} from './data.js?v=3';
+import {KOCH,LET,DIG,FULL,WORDS,PREFIXES,DIGITS} from './data.js?v=4';
 
 /* ---------- per-character progress ---------- */
 export function sequence(cfg){return cfg.order==='koch'?KOCH:cfg.order==='letters'?LET:FULL}
@@ -15,7 +15,7 @@ const randInt=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 function lengthRange(cfg){const a=Math.max(1,Math.min(cfg.lenMin,cfg.lenMax)),b=Math.max(cfg.lenMin,cfg.lenMax);return [a,b]}
 function maxRepeat(s){const n={};let m=0;for(const c of s){n[c]=(n[c]||0)+1;m=Math.max(m,n[c])}return m}
 
-/* ---------- generators: each returns {text, note?} ---------- */
+/* ---------- generators: each returns {text, note?} — note is an i18n key ---------- */
 function chars(cfg,p,last){
   const a=p.active;let c=pickWeighted(a,x=>weight(p,x));
   if(c===last&&a.length>2)c=pickWeighted(a,x=>weight(p,x));
@@ -32,7 +32,7 @@ function group(cfg,p,pool){
 function words(cfg,p,last){
   const [a,b]=lengthRange(cfg),act=new Set(p.active);
   const list=[...new Set(WORDS)].filter(w=>w.length>=a&&w.length<=b&&maxRepeat(w)<=Math.max(1,cfg.maxSame)&&(!cfg.limit||[...w].every(c=>act.has(c)))&&w!==last);
-  if(list.length<5){const g=group(cfg,p);g.note='Not enough words use only your learned characters and length, so this is a random group. Learn more characters, widen the length, or turn off “Only learned characters”.';return g}
+  if(list.length<5){const g=group(cfg,p);g.note='noteWords';return g}
   /* sample a few, keep the one with the most weak characters */
   const cand=Array.from({length:6},()=>list[Math.floor(Math.random()*list.length)]);
   return {text:pickWeighted(cand,w=>[...w].reduce((s,c)=>s+weight(p,c),0)/w.length)};
@@ -40,7 +40,7 @@ function words(cfg,p,last){
 function callsign(cfg,p){
   const act=new Set(p.active),lim=cfg.limit;
   const letters=lim?LET.filter(c=>act.has(c)):LET,digits=lim?DIG.filter(c=>act.has(c)):DIG;
-  if(lim&&(letters.length<2||digits.length<1)){const c=callsign(Object.assign({},cfg,{limit:false}),p);c.note='Callsigns need letters and at least one digit, so this one uses all characters. Turn off “Only learned characters” to hide this note.';return c}
+  if(lim&&(letters.length<2||digits.length<1)){const c=callsign(Object.assign({},cfg,{limit:false}),p);c.note='noteCalls';return c}
   /* prefix (as allocated) + one call-area digit; skip prefixes whose characters or digits aren't available */
   const usable=x=>(!lim||[...x].every(c=>act.has(c)))&&(DIGITS[x]||DIG.join('')).split('').some(d=>digits.includes(d));
   const pre=PREFIXES.filter(usable);

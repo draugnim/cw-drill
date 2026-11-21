@@ -1,13 +1,15 @@
-import {MORSE,NATO,LOOKUP,NOPE,CMD} from './data.js?v=3';
-import {createPlayer} from './morse.js?v=3';
-import {load,save as store} from './storage.js?v=3';
-import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=3';
-import {createMic,hasWebSpeech,canCapture} from './recognizer.js?v=3';
+import {MORSE,NATO,LOOKUP,NOPE,CMD} from './data.js?v=4';
+import {createPlayer} from './morse.js?v=4';
+import {load,save as store} from './storage.js?v=4';
+import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=4';
+import {createMic,hasWebSpeech,canCapture} from './recognizer.js?v=4';
+import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=4';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const cfg=load();
 const player=createPlayer($('led'));
+setLang(cfg.lang||pickDefault());
 
 let cur=null,last=null,buf=[],rawWords=[],busy=false,running=false,times={firstEnd:0,end:0},timer=null;
 let sess={ok:0,n:0,streak:0},speaking=false,ignoreUntil=0;
@@ -33,9 +35,9 @@ function sendCurrent(){times=player.play(cur.text,cfg)}
 function next(){
   if(!running)return;
   cur=nextItem(cfg,last&&last.text);last=cur;buf=[];rawWords=[];busy=false;
-  $('pat').textContent='';$('state').textContent='listening';$('itemNote').textContent=cur.note||'';
-  if(multi()){showSlots();$('msg').innerHTML=`Spell it: <b>${cur.text.length}</b> characters`}
-  else{setBig('?','wait',1);$('msg').innerHTML='What was that?'}
+  $('pat').textContent='';setState('stListening');$('itemNote').textContent=cur.note?t(cur.note):'';
+  if(multi()){showSlots();$('msg').innerHTML=t('spellIt',{n:cur.text.length})}
+  else{setBig('?','wait',1);$('msg').innerHTML=t('whatWas')}
   sendCurrent();render();
 }
 function pickVoice(){try{const v=speechSynthesis.getVoices();return v.find(x=>/^en[-_]US/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null}catch(e){return null}}
@@ -59,15 +61,15 @@ function finish(given,raw){
   if(cfg.hist.length>100)cfg.hist=cfg.hist.slice(-100);
   if(target.length===1){
     setBig(esc(target),ok?'ok':'bad',1);$('pat').textContent=patOf(target);
-    $('msg').innerHTML=ok?(fast?`<b>${NATO[target]}</b> — correct`:`<b>${NATO[target]}</b> — correct, but slow (${dt.toFixed(1)} s)`)
-      :(given==='NOPE'?'It was ':`Not ${esc(NATO[given]||given)}. It was `)+`<b>${NATO[target]}</b>`;
+    $('msg').innerHTML=ok?(fast?t('correct',{x:NATO[target]}):t('correctSlow',{x:NATO[target],s:dt.toFixed(1)}))
+      :given==='NOPE'?t('itWas',{x:NATO[target]}):t('notX',{g:esc(NATO[given]||given),x:NATO[target]});
   }else{
     setBig([...target].map((c,i)=>`<span class="${given!=='NOPE'&&given[i]===c?'g':'b'}">${esc(c)}</span>`).join(''),'',target.length);
-    $('msg').innerHTML=ok?(fast?`<b>${esc(target)}</b> — correct`:`<b>${esc(target)}</b> — correct, but slow (${dt.toFixed(1)} s)`)
-      :(given==='NOPE'?'It was ':`You spelled <b>${esc(given)}</b>. It was `)+`<b>${esc(target)}</b>`;
+    $('msg').innerHTML=ok?(fast?t('correct',{x:esc(target)}):t('correctSlow',{x:esc(target),s:dt.toFixed(1)}))
+      :given==='NOPE'?t('itWas',{x:esc(target)}):t('youSpelled',{g:esc(given),x:esc(target)});
   }
-  const nc=maybeUnlock(cfg);if(nc)$('msg').innerHTML+=` · <span style="color:var(--amber)">New character: <b>${esc(nc)}</b> ${NATO[nc]}</span>`;
-  $('state').textContent='';render();renderHist();persist();
+  const nc=maybeUnlock(cfg);if(nc)$('msg').innerHTML+=` · <span style="color:var(--amber)">${t('newChar',{c:esc(nc),n:NATO[nc]})}</span>`;
+  setState('');render();renderHist();persist();
   const after=()=>nc?introNew(nc,next):schedule(next,ok?0:600);
   if(!ok)say(spell(target),after);else schedule(after,target.length>1?1400:1000);
   return true;
@@ -84,7 +86,9 @@ function spellToken(tok){
 }
 
 /* ---------- speech ---------- */
-let ph={id:-1,n:0};
+let ph={id:-1,n:0},micState={on:false,label:''},micSrc={k:'',p:null};
+function micLabel(){$('mic').classList.toggle('on',micState.on);$('micL').textContent=t(micState.label||(micState.on?'micListening':'micOpen'))}
+function micSrcText(){const {k,p}=micSrc;$('micSrc').textContent=!k?'':k==='listeningOn'?t(k,{x:(p&&p.x)||t('defaultMic')}):t(k,p)}
 function onPhrase({id,text,alts,final}){
   $('live').textContent=text?'“'+text.trim()+'”':'';
   if(id!==ph.id)ph={id,n:0};
@@ -103,9 +107,9 @@ function onPhrase({id,text,alts,final}){
 const mic=createMic({
   audio:()=>player.audio(),
   onPhrase,
-  onState:(on,label)=>{$('mic').classList.toggle('on',on);$('micL').textContent=label||(on?'Mic open — listening':'Open mic');if(!on)$('live').textContent=''},
-  onError:m=>{$('err').textContent=m},
-  onSource:t=>{$('micSrc').textContent=t}
+  onState:(on,label)=>{micState={on,label};micLabel();if(!on)$('live').textContent=''},
+  onError:(k,p)=>{$('err').textContent=t(k,p)},
+  onSource:(k,p)=>{micSrc={k,p};micSrcText()}
 });
 
 /* ---------- typed answers ---------- */
@@ -114,22 +118,25 @@ function typedToString(v){let s='';for(const t of tokens(v)){const g=parseTok(t)
     if(g==='NOPE')return 'NOPE';if(g&&g.length===1){s+=g;continue}
     const u=t.toUpperCase();if(/^[A-Z0-9.,?/=]+$/.test(u))s+=u}return s}
 $('ans').addEventListener('input',()=>{$('err').textContent='';if(multi())return;
-  const v=$('ans').value;if(v.length<proc)proc=v.length;const t=tokens(v.slice(proc));
-  for(let i=t.length-1;i>=0;i--){const g=parseTok(t[i]);if(g&&(g.length===1||g==='NOPE')){const raw=v.slice(proc);proc=v.length;if(!finish(g,raw)&&!running)$('err').textContent='Press Start first.';return}}});
+  const v=$('ans').value;if(v.length<proc)proc=v.length;const tk=tokens(v.slice(proc));
+  for(let i=tk.length-1;i>=0;i--){const g=parseTok(tk[i]);if(g&&(g.length===1||g==='NOPE')){const raw=v.slice(proc);proc=v.length;if(!finish(g,raw)&&!running)$('err').textContent=t('pressStart');return}}});
 $('ans').addEventListener('keydown',e=>{if(e.key!=='Enter')return;
   const v=multi()?$('ans').value:$('ans').value.slice(proc);$('ans').value='';proc=0;
-  if(!running){$('err').textContent='Press Start first.';return}
+  if(!running){$('err').textContent=t('pressStart');return}
   const s=typedToString(v);
-  if(!s){$('err').textContent='Didn’t recognise that. Try Kilo, Two, Stop, plain letters, or nope.';return}
+  if(!s){$('err').textContent=t('notRecognised');return}
   if(s!=='NOPE'&&!multi())finish(s[s.length-1],v);else finish(s,v)});
 
 /* ---------- controls ---------- */
-function start(){player.audio();running=true;$('startL').textContent='Pause';$('start').querySelector('svg').innerHTML='<path d="M8 5v14M16 5v14"/>';next()}
-function pause(){running=false;clearTimeout(timer);try{speechSynthesis.cancel()}catch(e){}speaking=false;player.stop();busy=false;
-  $('startL').textContent='Start';$('start').querySelector('svg').innerHTML='<path d="M7 4v16l13-8z"/>';$('state').textContent='paused';$('msg').innerHTML='Paused. Press <b>Start</b> to continue.';render()}
+let paused=false,stateKey='stReady';
+function setState(k){stateKey=k;$('state').textContent=k?t(k):''}
+function startLabel(){$('startL').textContent=t(running?'pause':'start')}
+function start(){player.audio();running=true;paused=false;startLabel();$('start').querySelector('svg').innerHTML='<path d="M8 5v14M16 5v14"/>';next()}
+function pause(){running=false;paused=true;clearTimeout(timer);try{speechSynthesis.cancel()}catch(e){}speaking=false;player.stop();busy=false;
+  startLabel();$('start').querySelector('svg').innerHTML='<path d="M7 4v16l13-8z"/>';setState('stPaused');$('msg').innerHTML=t('pausedMsg');render()}
 $('start').onclick=()=>running?pause():start();
-$('rep').onclick=()=>{if(!cur){$('err').textContent='Press Start first.';return}sendCurrent()};
-$('nope').onclick=()=>{if(!running){$('err').textContent='Press Start first.';return}finish('NOPE','Next button')};
+$('rep').onclick=()=>{if(!cur){$('err').textContent=t('pressStart');return}sendCurrent()};
+$('nope').onclick=()=>{if(!running){$('err').textContent=t('pressStart');return}finish('NOPE',t('nextBtn'))};
 $('mic').onclick=()=>{$('err').textContent='';player.audio();if(mic.on){mic.stop();return}mic.start({engine:cfg.engine,micId:cfg.micId})};
 document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.metaKey||e.ctrlKey)return;const k=e.key.toLowerCase();
   if(k===' '){e.preventDefault();running?pause():start()}else if(k==='r')$('rep').click();else if(k==='n')$('nope').click();else if(k==='m'&&!$('mic').hidden)$('mic').click()});
@@ -142,28 +149,29 @@ function render(){const p=getProg(cfg),o=sequence(cfg);
     return `<div class="cell${on?'':' locked'}" title="${NATO[c]}: ${st.ok}/${st.a} correct"><div class="c">${esc(c)}</div><div class="p">${on?(st.a?pct+'%':'new'):'–'}</div>${on?`<div class="bar" style="width:${Math.max(6,s*100)}%;background:${col}"></div>`:''}</div>`}).join('');
   const learned=p.active.filter(c=>p.S[c].s>=cfg.unlock/100&&p.S[c].a>=4).length;
   $('sAcc').textContent=sess.n?Math.round(100*sess.ok/sess.n)+'%':'–';$('sStr').textContent=sess.streak;$('sLrn').textContent=learned+'/'+o.length;$('sN').textContent=sess.n;
-  $('setInfo').textContent=`${p.active.length} of ${o.length} in rotation`;$('mSum').textContent=`${p.active.length} of ${o.length} in rotation`;
+  $('setInfo').textContent=$('mSum').textContent=t('inRotation',{a:p.active.length,b:o.length});
   const weak=p.active.filter(c=>p.S[c].a>0&&p.S[c].s<0.6).sort((a,b)=>p.S[a].s-p.S[b].s).slice(0,5);
-  $('weak').innerHTML=weak.length?'Drilling most: '+weak.map(c=>`<b>${esc(c)}</b> ${NATO[c]}`).join(' · '):''}
+  $('weak').innerHTML=weak.length?t('drilling')+weak.map(c=>`<b>${esc(c)}</b> ${NATO[c]}`).join(' · '):''}
 function renderHist(){const H=cfg.hist||[];
-  if(!H.length){$('histBody').innerHTML='<tr><td colspan="4" class="empty">No answers yet.</td></tr>';$('histSum').textContent='';return}
+  if(!H.length){$('histBody').innerHTML=`<tr><td colspan="4" class="empty">${t('noAnswers')}</td></tr>`;$('histSum').textContent='';return}
   $('histBody').innerHTML=H.slice().reverse().map(x=>{
     const cls=x.ok?(x.slow?'slow':'ok'):'bad',single=x.c.length===1;
     const sent=single?`${esc(x.c)} <span class="w">${esc(NATO[x.c]||'')}</span>`:esc(x.c);
-    const you=x.g==='NOPE'?'nope':single?esc(NATO[x.g]||x.g):[...x.g].map((c,i)=>c===x.c[i]?esc(c):`<span class="x">${esc(c)}</span>`).join('');
-    return `<tr class="${cls}"><td class="c">${sent}</td><td>${you}${x.raw?`<span class="raw">“${esc(x.raw)}”</span>`:''}</td><td class="res">${x.ok?(x.slow?'slow':'✓'):'✗'}</td><td class="r">${x.dt}s</td></tr>`}).join('');
+    const you=x.g==='NOPE'?t('nopeWord'):single?esc(NATO[x.g]||x.g):[...x.g].map((c,i)=>c===x.c[i]?esc(c):`<span class="x">${esc(c)}</span>`).join('');
+    return `<tr class="${cls}"><td class="c">${sent}</td><td>${you}${x.raw?`<span class="raw">“${esc(x.raw)}”</span>`:''}</td><td class="res">${x.ok?(x.slow?t('slowWord'):'✓'):'✗'}</td><td class="r">${x.dt}s</td></tr>`}).join('');
   const ok=H.filter(x=>x.ok).length,miss={};
   H.forEach(x=>{if(x.ok)return;[...x.c].forEach((c,i)=>{if(x.g==='NOPE'||x.g[i]!==c)miss[c]=(miss[c]||0)+1})});
   const top=Object.entries(miss).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([c,n])=>c+' ×'+n).join(', ');
-  $('histSum').textContent=`${H.length} answers · ${Math.round(100*ok/H.length)}% correct`+(top?` · most missed: ${top}`:'')}
-function armButton(id,label,confirm,action){let t;$(id).onclick=()=>{const b=$(id);
-  if(!b.classList.contains('arm')){b.classList.add('arm');b.textContent=confirm;t=setTimeout(()=>{b.classList.remove('arm');b.textContent=label},3000);return}
-  clearTimeout(t);b.classList.remove('arm');b.textContent=label;action()}}
-armButton('histClear','Clear history','Tap again to clear',()=>{cfg.hist=[];renderHist();persist()});
-armButton('resetB','Reset progress for this character set','Tap again to confirm reset',()=>{delete cfg.prog[cfg.order];sess={ok:0,n:0,streak:0};cur=null;if(running)pause();render();persist()});
+  $('histSum').textContent=t('histSum',{n:H.length,p:Math.round(100*ok/H.length)})+(top?t('mostMissed',{x:top}):'')}
+function armButton(id,label,confirm,action){let tm;$(id).textContent=t(label);$(id).dataset.label=label;$(id).onclick=()=>{const b=$(id);
+  if(!b.classList.contains('arm')){b.classList.add('arm');b.textContent=t(confirm);tm=setTimeout(()=>{b.classList.remove('arm');b.textContent=t(label)},3000);return}
+  clearTimeout(tm);b.classList.remove('arm');b.textContent=t(label);action()}}
+armButton('histClear','clearHist','confirmClear',()=>{cfg.hist=[];renderHist();persist()});
+armButton('resetB','resetProg','confirmReset',()=>{delete cfg.prog[cfg.order];sess={ok:0,n:0,streak:0};cur=null;if(running)pause();render();persist()});
 
 /* ---------- settings ---------- */
-function persist(){$('sync').textContent=store(cfg)?'saved':'not saved'}
+let syncKey='device';
+function persist(){syncKey=store(cfg)?'saved':'notSaved';$('sync').textContent=t(syncKey)}
 const FMT={wpm:v=>v+' wpm',charGap:v=>v===3?'3 (std)':v+'',wordGap:v=>v===7?'7 (std)':v+'',repeats:v=>v===1?'once':v+'×',repeatGap:v=>v+' s',
   hz:v=>v+' Hz',vol:v=>v+'%',slow:v=>v+' s',unlock:v=>v+'%',lenMin:v=>v+'',lenMax:v=>v+'',maxSame:v=>v+'×'};
 for(const id in FMT){const el=$(id);el.value=cfg[id];$(id+'O').textContent=FMT[id](cfg[id]);
@@ -174,21 +182,31 @@ for(const id in FMT){const el=$(id);el.value=cfg[id];$(id+'O').textContent=FMT[i
 $('masteryBox').open=cfg.showMastery;$('masteryBox').addEventListener('toggle',()=>{cfg.showMastery=$('masteryBox').open;persist()});
 $('limit').checked=cfg.limit;$('limit').addEventListener('change',()=>{cfg.limit=$('limit').checked;persist()});
 function modeUI(){document.querySelectorAll('[data-multi]').forEach(el=>el.hidden=!multi());
-  $('ans').placeholder=multi()?'Type KMRS or kilo mike, then Enter':'Or type: kilo, two, stop…';$('ans').enterKeyHint='done'}
+  $('ans').placeholder=t(multi()?'phMulti':'phSingle');$('ans').enterKeyHint='done'}
 $('mode').value=cfg.mode;$('mode').addEventListener('change',()=>{cfg.mode=$('mode').value;$('ans').value='';proc=0;if(running)pause();cur=null;$('itemNote').textContent='';modeUI();persist()});
 $('order').value=cfg.order;$('order').addEventListener('change',()=>{cfg.order=$('order').value;cur=null;if(running)pause();render();persist()});
 
 async function listMics(){const d=await mic.listMics(),sel=$('micDev');
-  sel.innerHTML='<option value="">Auto (earbuds if found)</option>'+d.map((x,i)=>`<option value="${esc(x.deviceId)}">${esc(x.label||'Microphone '+(i+1))}</option>`).join('');
+  sel.innerHTML=`<option value="">${esc(t('micAuto'))}</option>`+d.map((x,i)=>`<option value="${esc(x.deviceId)}">${esc(x.label||t('micN',{n:i+1}))}</option>`).join('');
   sel.value=d.some(x=>x.deviceId===cfg.micId)?cfg.micId:''}
 function micNote(){
   const off=cfg.engine==='offline';$('micDevRow').hidden=!off;
-  if(off){$('mic').hidden=!canCapture;$('micNote').innerHTML=canCapture?'Offline recogniser: listens only for phonetic words, numbers, “nope”, “over” and “correction”. Choose the mic in Settings → Mic input.':'The mic needs this page served over https://.';return}
-  if(!hasWebSpeech){$('mic').hidden=true;$('micNote').textContent='This browser has no speech service. Switch Settings → Recogniser to Offline.';return}
-  if(!window.isSecureContext){$('mic').hidden=true;$('micNote').textContent='The mic needs this page served over https://.';return}
-  $('mic').hidden=false;$('micNote').innerHTML='Tap <b>Open mic</b> once and keep talking — it reopens by itself after pauses. Headphones help, so the mic doesn’t hear the tone.'}
-$('engine').value=cfg.engine;$('engine').addEventListener('change',()=>{const was=mic.on;if(was)mic.stop();cfg.engine=$('engine').value;persist();micNote();if(cfg.engine==='offline')listMics();if(was)$('err').textContent='Recogniser changed. Tap Open mic again.'});
-$('micDev').addEventListener('change',()=>{cfg.micId=$('micDev').value;persist();if(mic.on&&cfg.engine==='offline')$('err').textContent='Turn the mic off and on again to switch inputs.'});
+  if(off){$('mic').hidden=!canCapture;$('micNote').innerHTML=t(canCapture?'noteOffline':'noteHttps');return}
+  if(!hasWebSpeech){$('mic').hidden=true;$('micNote').textContent=t('noteNoSpeech');return}
+  if(!window.isSecureContext){$('mic').hidden=true;$('micNote').textContent=t('noteHttps');return}
+  $('mic').hidden=false;$('micNote').innerHTML=t('noteBrowser')}
+$('engine').value=cfg.engine;$('engine').addEventListener('change',()=>{const was=mic.on;if(was)mic.stop();cfg.engine=$('engine').value;persist();micNote();if(cfg.engine==='offline')listMics();if(was)$('err').textContent=t('recChanged')});
+$('micDev').addEventListener('change',()=>{cfg.micId=$('micDev').value;persist();if(mic.on&&cfg.engine==='offline')$('err').textContent=t('switchInputs')});
 if(navigator.mediaDevices&&navigator.mediaDevices.addEventListener)navigator.mediaDevices.addEventListener('devicechange',()=>{if(cfg.engine==='offline')listMics()});
 
-modeUI();micNote();if(cfg.engine==='offline')listMics();render();renderHist();
+/* ---------- language ---------- */
+function relabel(){
+  applyStatic();startLabel();setState(stateKey);micLabel();micSrcText();modeUI();micNote();render();renderHist();
+  $('sync').textContent=t(syncKey);['histClear','resetB'].forEach(id=>{if(!$(id).classList.contains('arm'))$(id).textContent=t($(id).dataset.label)});
+  if(!running)$('msg').innerHTML=t(paused?'pausedMsg':'intro');else if(cur&&!busy)$('itemNote').textContent=cur.note?t(cur.note):'';
+  if(cfg.engine==='offline')listMics();
+}
+$('lang').value=getLang();
+$('lang').addEventListener('change',()=>{cfg.lang=$('lang').value;setLang(cfg.lang);persist();relabel()});
+
+relabel();

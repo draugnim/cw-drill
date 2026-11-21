@@ -7,33 +7,38 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./style.css?v=3">
+<link rel="icon" type="image/svg+xml" href="./img/logo.svg">
+<link rel="stylesheet" href="./style.css?v=4">
 </head>
 <body>
 <div class="wrap">
 <header>
-  <div><h1><span>-.-.</span>CW copy drill</h1><div class="sub">Hear it, say it. Weak characters come back more often.</div></div>
-  <div class="sync" id="sync">this device</div>
+  <img class="logo" src="./img/logo.svg" alt="E74BYZ">
+  <div class="htext"><h1><span>-.-.</span>CW copy drill</h1><div class="sub" data-i18n="sub"></div></div>
+  <div class="hside">
+    <select id="lang" aria-label="Language"><option value="en">EN</option><option value="sr">SR</option><option value="sr-Cyrl">СР</option></select>
+    <div class="sync" id="sync"></div>
+  </div>
 </header>
 
 <div class="card">
   <div class="scope">
     <div class="led" id="led"></div>
-    <div class="state" id="state">ready</div>
+    <div class="state" id="state"></div>
     <div class="big wait" id="big">?</div>
     <div class="pat" id="pat"></div>
   </div>
-  <div class="msg" id="msg">Press <b>Start</b>, then answer with phonetic names, or say <b>nope</b>.</div>
+  <div class="msg" id="msg" data-i18n-html="intro"></div>
   <div class="note2" id="itemNote"></div>
   <div class="live" id="live"></div>
   <div class="btns">
-    <button class="primary" id="start"><svg viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg><span id="startL">Start</span></button>
-    <button id="rep"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>Replay</button>
-    <button id="nope" title="Skip — counts as a miss and tells you the answer"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Next</button>
+    <button class="primary" id="start"><svg viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg><span id="startL"></span></button>
+    <button id="rep"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg><span data-i18n="replay"></span></button>
+    <button id="nope" data-i18n-title="nextTitle"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span data-i18n="next"></span></button>
   </div>
-  <button class="mic" id="mic"><span class="dot"></span><span id="micL">Open mic</span></button>
+  <button class="mic" id="mic"><span class="dot"></span><span id="micL"></span></button>
   <div class="type">
-    <input type="text" id="ans" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Or type: kilo, two, stop…">
+    <input type="text" id="ans" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
   </div>
   <div class="err" id="err"></div>
   <div class="note" id="micNote"></div>
@@ -41,58 +46,58 @@
 </div>
 
 <div class="stats">
-  <div class="stat"><p>Accuracy</p><b id="sAcc">–</b></div>
-  <div class="stat"><p>Streak</p><b id="sStr">0</b></div>
-  <div class="stat"><p>Learned</p><b id="sLrn">0</b></div>
-  <div class="stat"><p>Answers</p><b id="sN">0</b></div>
+  <div class="stat"><p data-i18n="accuracy"></p><b id="sAcc">–</b></div>
+  <div class="stat"><p data-i18n="streak"></p><b id="sStr">0</b></div>
+  <div class="stat"><p data-i18n="learned"></p><b id="sLrn">0</b></div>
+  <div class="stat"><p data-i18n="answers"></p><b id="sN">0</b></div>
 </div>
 
 <div class="card">
   <details id="masteryBox" class="mastery">
-    <summary><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>Mastery <span class="msum" id="mSum"></span></summary>
-    <div class="sec" style="margin-top:12px"><h2>Characters</h2><span id="setInfo"></span></div>
+    <summary><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg><span data-i18n="mastery"></span> <span class="msum" id="mSum"></span></summary>
+    <div class="sec" style="margin-top:12px"><h2 data-i18n="characters"></h2><span id="setInfo"></span></div>
     <div class="grid" id="grid"></div>
     <div class="weak" id="weak"></div>
   </details>
 
   <details id="setBox">
-    <summary><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</summary>
+    <summary><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span data-i18n="settings"></span></summary>
 
-    <div class="setgroup">Exercise</div>
-    <div class="set"><label for="mode">Type</label><select id="mode"><option value="chars">Single characters</option><option value="groups">Random groups</option><option value="words">Words</option><option value="calls">Callsigns</option></select></div>
-    <div class="set"><label for="order">Character set</label><select id="order"><option value="koch">Koch order (starts with K M)</option><option value="letters">All letters</option><option value="full">Letters, numbers, punctuation</option></select></div>
-    <div class="set" data-multi><label for="lenMin">Shortest</label><input type="range" id="lenMin" min="1" max="10" step="1"><output id="lenMinO"></output></div>
-    <div class="set" data-multi><label for="lenMax">Longest</label><input type="range" id="lenMax" min="1" max="10" step="1"><output id="lenMaxO"></output></div>
-    <div class="set" data-multi><label for="maxSame">Same char max</label><input type="range" id="maxSame" min="1" max="5" step="1"><output id="maxSameO"></output></div>
-    <div class="set" data-multi><label for="limit">Learned only</label><label class="chk"><input type="checkbox" id="limit"> Only characters in rotation</label></div>
+    <div class="setgroup" data-i18n="gExercise"></div>
+    <div class="set"><label for="mode" data-i18n="type"></label><select id="mode"><option value="chars" data-i18n="mChars"></option><option value="groups" data-i18n="mGroups"></option><option value="words" data-i18n="mWords"></option><option value="calls" data-i18n="mCalls"></option></select></div>
+    <div class="set"><label for="order" data-i18n="charset"></label><select id="order"><option value="koch" data-i18n="oKoch"></option><option value="letters" data-i18n="oLetters"></option><option value="full" data-i18n="oFull"></option></select></div>
+    <div class="set" data-multi><label for="lenMin" data-i18n="shortest"></label><input type="range" id="lenMin" min="1" max="10" step="1"><output id="lenMinO"></output></div>
+    <div class="set" data-multi><label for="lenMax" data-i18n="longest"></label><input type="range" id="lenMax" min="1" max="10" step="1"><output id="lenMaxO"></output></div>
+    <div class="set" data-multi><label for="maxSame" data-i18n="maxSame"></label><input type="range" id="maxSame" min="1" max="5" step="1"><output id="maxSameO"></output></div>
+    <div class="set" data-multi><label for="limit" data-i18n="learnedOnly"></label><label class="chk"><input type="checkbox" id="limit"> <span data-i18n="onlyRotation"></span></label></div>
 
-    <div class="setgroup">Sending</div>
-    <div class="set"><label for="wpm">Speed</label><input type="range" id="wpm" min="10" max="45" step="1"><output id="wpmO"></output></div>
-    <div class="set"><label for="charGap">Character gap</label><input type="range" id="charGap" min="3" max="21" step="1"><output id="charGapO"></output></div>
-    <div class="set"><label for="wordGap">Word gap</label><input type="range" id="wordGap" min="7" max="35" step="1"><output id="wordGapO"></output></div>
-    <div class="set"><label for="repeats">Send times</label><input type="range" id="repeats" min="1" max="5" step="1"><output id="repeatsO"></output></div>
-    <div class="set"><label for="repeatGap">Repeat pause</label><input type="range" id="repeatGap" min="0.5" max="5" step="0.5"><output id="repeatGapO"></output></div>
-    <div class="set"><label for="hz">Tone</label><input type="range" id="hz" min="400" max="900" step="10"><output id="hzO"></output></div>
-    <div class="set"><label for="vol">Volume</label><input type="range" id="vol" min="5" max="100" step="5"><output id="volO"></output></div>
+    <div class="setgroup" data-i18n="gSending"></div>
+    <div class="set"><label for="wpm" data-i18n="speed"></label><input type="range" id="wpm" min="10" max="45" step="1"><output id="wpmO"></output></div>
+    <div class="set"><label for="charGap" data-i18n="charGap"></label><input type="range" id="charGap" min="3" max="21" step="1"><output id="charGapO"></output></div>
+    <div class="set"><label for="wordGap" data-i18n="wordGap"></label><input type="range" id="wordGap" min="7" max="35" step="1"><output id="wordGapO"></output></div>
+    <div class="set"><label for="repeats" data-i18n="sendTimes"></label><input type="range" id="repeats" min="1" max="5" step="1"><output id="repeatsO"></output></div>
+    <div class="set"><label for="repeatGap" data-i18n="repeatPause"></label><input type="range" id="repeatGap" min="0.5" max="5" step="0.5"><output id="repeatGapO"></output></div>
+    <div class="set"><label for="hz" data-i18n="tone"></label><input type="range" id="hz" min="400" max="900" step="10"><output id="hzO"></output></div>
+    <div class="set"><label for="vol" data-i18n="volume"></label><input type="range" id="vol" min="5" max="100" step="5"><output id="volO"></output></div>
 
-    <div class="setgroup">Answering</div>
-    <div class="set"><label for="slow">Slow after</label><input type="range" id="slow" min="1" max="10" step="0.5"><output id="slowO"></output></div>
-    <div class="set"><label for="unlock">Unlock at</label><input type="range" id="unlock" min="60" max="95" step="5"><output id="unlockO"></output></div>
-    <div class="set"><label for="engine">Recogniser</label><select id="engine"><option value="browser">Phone’s speech service</option><option value="offline">Offline, choose mic (40 MB)</option></select></div>
-    <div class="set" id="micDevRow"><label for="micDev">Mic input</label><select id="micDev"><option value="">Auto (earbuds if found)</option></select></div>
-    <button class="danger" id="resetB">Reset progress for this character set</button>
+    <div class="setgroup" data-i18n="gAnswering"></div>
+    <div class="set"><label for="slow" data-i18n="slowAfter"></label><input type="range" id="slow" min="1" max="10" step="0.5"><output id="slowO"></output></div>
+    <div class="set"><label for="unlock" data-i18n="unlockAt"></label><input type="range" id="unlock" min="60" max="95" step="5"><output id="unlockO"></output></div>
+    <div class="set"><label for="engine" data-i18n="recogniser"></label><select id="engine"><option value="browser" data-i18n="eBrowser"></option><option value="offline" data-i18n="eOffline"></option></select></div>
+    <div class="set" id="micDevRow"><label for="micDev" data-i18n="micInput"></label><select id="micDev"></select></div>
+    <button class="danger" id="resetB"></button>
   </details>
 
   <details class="hist" id="histBox">
-    <summary><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><path d="M3.05 11a9 9 0 1 1 .5 4"/><path d="M3 4v7h7"/></svg>History (last 100)</summary>
+    <summary><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><path d="M3.05 11a9 9 0 1 1 .5 4"/><path d="M3 4v7h7"/></svg><span data-i18n="history"></span></summary>
     <div class="sum" id="histSum"></div>
     <table><colgroup><col style="width:30%"><col style="width:40%"><col style="width:15%"><col style="width:15%"></colgroup>
-      <thead><tr><th>Sent</th><th>You said</th><th>Result</th><th class="r">Time</th></tr></thead><tbody id="histBody"></tbody></table>
-    <button class="danger" id="histClear">Clear history</button>
+      <thead><tr><th data-i18n="hSent"></th><th data-i18n="hYou"></th><th data-i18n="hResult"></th><th class="r" data-i18n="hTime"></th></tr></thead><tbody id="histBody"></tbody></table>
+    <button class="danger" id="histClear"></button>
   </details>
-  <div class="keys">Spelling words: say each letter, then it checks when the length is complete. “Over” checks early, “correction” removes the last letter.<br>Keys (outside the text box): <kbd>Space</kbd> start/pause · <kbd>R</kbd> replay · <kbd>N</kbd> next · <kbd>M</kbd> mic</div>
+  <div class="keys" data-i18n-html="help"></div>
 </div>
 </div>
-<script type="module" src="./js/app.js?v=3"></script>
+<script type="module" src="./js/app.js?v=4"></script>
 </body>
 </html>
