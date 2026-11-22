@@ -187,3 +187,5 @@ header{gap:12px;justify-content:flex-start}
 .cell{cursor:pointer;transition:transform .06s,border-color .12s}
 .cell:hover{border-color:var(--amber)}
 .cell:active{transform:scale(.94)}
+.warn{font-size:12px;line-height:1.5;color:var(--amber);background:var(--amber-d);border-radius:8px;padding:8px 10px;margin-top:12px}
+[data-theme="light"] .warn{color:#b83c00;border-radius:4px}

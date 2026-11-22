@@ -41,6 +41,8 @@ const EN={
   noteWords:'Not enough words use only your learned characters and length, so this is a random group. Learn more characters, widen the length, or turn off “Only characters in rotation”.',
   noteCalls:'Callsigns need letters and at least one digit, so this one uses all characters. Turn off “Only characters in rotation” to hide this note.',
   sayAgain:'Didn’t catch that clearly — say it again.',
+  gBand:'Band conditions',noise:'Noise',qsb:'Fading (QSB)',qrn:'Static (QRN)',qrm:'Interference (QRM)',bandWhen:'Play',bwSend:'While sending',bwAlways:'All the time',
+  bandWarn:'⚠ Without earbuds or headphones the mic also hears this background sound, which makes voice recognition worse (especially offline). Use headphones, or set Play to “While sending”.',
   language:'Language',toDark:'Switch to dark theme',toLight:'Switch to light theme',
   howTo:'How to use',
   guide:'<h3>Basics</h3><p>Press <b>Start</b>. The app sends Morse; answer by saying the phonetic name (Kilo, Mike, Two, Stop…). If you can’t copy it, say <b>next</b> (or skip, pass) or tap <b>Next</b>: it counts as a miss, the answer is read out and the next one is sent. <b>Replay</b> sends the current item again.</p>'+
@@ -57,6 +59,7 @@ const EN={
     '<dt>Character gap / Word gap</dt><dd>Spacing in dit lengths. Standard is 3 and 7; larger values give more thinking time without slowing the characters themselves (Farnsworth).</dd>'+
     '<dt>Send times / Repeat pause</dt><dd>Send each item several times, with this pause between sendings.</dd>'+
     '<dt>Tone / Volume</dt><dd>Sidetone pitch and loudness.</dd>'+
+    '<dt>Noise / Fading / Static / Interference</dt><dd>Simulated band conditions: receiver hiss around your tone, the signal slowly fading in and out, random static crashes, and a second CW station sending nearby. 0 turns each one off. <b>Play</b> chooses whether they sound only while a character is being sent or all the time. Without headphones the mic hears them too, which makes recognition worse.</dd>'+
     '<dt>Slow after</dt><dd>An answer slower than this (counted from the end of sending) is correct but slow, and raises mastery less.</dd>'+
     '<dt>Pause after correct</dt><dd>How long the correct answer stays on screen before the next character or word is sent.</dd>'+
     '<dt>Unlock at</dt><dd>Mastery needed before Koch adds the next character.</dd>'+
@@ -106,6 +109,8 @@ const SR={
   noteWords:'Nema dovoljno riječi samo od naučenih znakova i zadate dužine, pa je ovo nasumična grupa. Nauči još znakova, proširi dužinu ili isključi „Samo znakovi u vježbi“.',
   noteCalls:'Pozivnom znaku trebaju slova i bar jedna cifra, pa ovaj koristi sve znakove. Isključi „Samo znakovi u vježbi“ da sakriješ ovu napomenu.',
   sayAgain:'Nije razumljivo — ponovi.',
+  gBand:'Uslovi na opsegu',noise:'Šum',qsb:'Feding ([[QSB]])',qrn:'Pucketanje ([[QRN]])',qrm:'Smetnje ([[QRM]])',bandWhen:'Pusti',bwSend:'Dok se šalje',bwAlways:'Stalno',
+  bandWarn:'⚠ Bez slušalica mikrofon čuje i ovaj zvuk u pozadini, pa prepoznavanje govora radi lošije (naročito oflajn). Koristi slušalice ili za „Pusti“ izaberi „Dok se šalje“.',
   language:'Jezik',toDark:'Prebaci na tamnu temu',toLight:'Prebaci na svijetlu temu',
   howTo:'Uputstvo',
   guide:'<h3>Osnove</h3><p>Pritisni <b>Start</b>. Aplikacija šalje Morzeov kod, a ti odgovaraš izgovarajući fonetsko ime ([[Kilo, Mike, Two, Stop]]…). Ako nisi primio znak, reci <b>[[next]]</b> (ili [[skip, pass]]) ili dodirni <b>Dalje</b>: računa se kao promašaj, odgovor se pročita naglas i šalje se sljedeći. <b>Ponovi</b> ponovo šalje trenutnu stavku.</p>'+
@@ -122,6 +127,7 @@ const SR={
     '<dt>Razmak znakova / Razmak riječi</dt><dd>Razmak u dužinama tačke. Standard je 3 i 7; veće vrijednosti daju više vremena za razmišljanje bez usporavanja samih znakova ([[Farnsworth]]).</dd>'+
     '<dt>Broj slanja / Pauza ponavljanja</dt><dd>Svaka stavka se šalje više puta, sa ovom pauzom između.</dd>'+
     '<dt>Ton / Jačina</dt><dd>Visina i glasnoća tona.</dd>'+
+    '<dt>Šum / Feding / Pucketanje / Smetnje</dt><dd>Simulirani uslovi na opsegu: šum prijemnika oko tvog tona, signal koji polako slabi i jača, nasumično pucketanje i druga [[CW]] stanica koja šalje u blizini. 0 isključuje svaki od njih. <b>Pusti</b> bira da li se čuju samo dok se znak šalje ili stalno. Bez slušalica ih čuje i mikrofon, pa prepoznavanje radi lošije.</dd>'+
     '<dt>Sporo nakon</dt><dd>Odgovor sporiji od ovoga (računa se od kraja slanja) je tačan, ali spor, i manje podiže savladanost.</dd>'+
     '<dt>Pauza nakon tačnog</dt><dd>Koliko dugo tačan odgovor ostaje na ekranu prije slanja sljedećeg znaka ili riječi.</dd>'+
     '<dt>Otključaj na</dt><dd>Savladanost potrebna da [[Koch]] doda sljedeći znak.</dd>'+
