@@ -1,7 +1,8 @@
 import {KOCH,LET,DIG,FULL,WORDS,PREFIXES,DIGITS} from './data.js?v=5';
 
 /* ---------- per-character progress ---------- */
-export function sequence(cfg){return cfg.order==='koch'?KOCH:cfg.order==='letters'?LET:FULL}
+const ALNUM=LET.concat(DIG);
+export function sequence(cfg){return cfg.order==='koch'?KOCH:cfg.order==='letters'?LET:cfg.order==='alnum'?ALNUM:FULL}
 export function getProg(cfg){
   let p=cfg.prog[cfg.order];
   if(!p){const o=sequence(cfg);p={active:cfg.order==='koch'?o.slice(0,2):o.slice(),S:{}};cfg.prog[cfg.order]=p}

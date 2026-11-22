@@ -2,9 +2,9 @@ import {MORSE,NATO,LOOKUP,NOPE,CMD,FULL} from './data.js?v=5';
 import {createPlayer} from './morse.js?v=16';
 import {createBand} from './band.js?v=16';
 import {load,save as store} from './storage.js?v=16';
-import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=5';
+import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=17';
 import {createMic,hasWebSpeech,canCapture,GRAMMAR} from './recognizer.js?v=13';
-import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=16';
+import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=17';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));

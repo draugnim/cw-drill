@@ -11,7 +11,7 @@ const EN={
   mastery:'Mastery',characters:'Characters',inRotation:'{a} of {b} in rotation',drilling:'Drilling most: ',
   settings:'Settings',gExercise:'Exercise',gSending:'Sending',gAnswering:'Answering',
   type:'Type',mChars:'Single characters',mGroups:'Random groups',mWords:'Words',mCalls:'Callsigns',
-  charset:'Character set',oKoch:'Koch order (starts with K M)',oLetters:'All letters',oFull:'Letters, numbers, punctuation',
+  charset:'Character set',oKoch:'Koch order (starts with K M)',oLetters:'All letters',oAlnum:'Letters and numbers',oFull:'Letters, numbers, punctuation',
   shortest:'Shortest',longest:'Longest',maxSame:'Same char max',learnedOnly:'Learned only',onlyRotation:'Only characters in rotation',
   speed:'Speed',charGap:'Character gap',wordGap:'Word gap',sendTimes:'Send times',repeatPause:'Repeat pause',tone:'Tone',volume:'Volume',
   slowAfter:'Slow after',okPause:'Pause after correct',unlockAt:'Unlock at',recogniser:'Recogniser',eBrowser:'Phone’s speech service',eOffline:'Offline, choose mic (40 MB)',
@@ -51,7 +51,7 @@ const EN={
     '<p>For groups, words and callsigns, spell the answer letter by letter. It is checked once you have given as many characters as were sent. Say <b>over</b> (or done) to check early, <b>correction</b> (or back, delete) to remove the last letter. Typing: KM or kilo mike, then Enter.</p>'+
     '<h3>How it adapts</h3><p>Every character has a mastery score. Misses lower it, correct answers raise it, fast ones more than slow ones. Weak characters are picked more often. In <b>Koch order</b> you start with K and M; the next character unlocks when every character in rotation reaches the <b>Unlock at</b> level (with at least 4 attempts each). The <b>Mastery</b> panel shows the scores: red weak, amber improving, green solid. It is closed by default so it doesn’t give answers away. Tap a character there to hear it (this pauses the drill).</p>'+
     '<h3>Settings</h3><dl>'+
-    '<dt>Character set</dt><dd>Koch order (unlocks gradually), all letters, or letters, numbers and punctuation (all at once).</dd>'+
+    '<dt>Character set</dt><dd>Koch order (unlocks gradually), all letters, letters and numbers, or letters, numbers and punctuation (all at once).</dd>'+
     '<dt>Shortest / Longest</dt><dd>Length range for groups and words.</dd>'+
     '<dt>Same char max</dt><dd>How many times one character may appear in a group, word or callsign.</dd>'+
     '<dt>Learned only</dt><dd>Groups, words and callsigns use only characters in rotation. If too few words fit, you get a random group instead.</dd>'+
@@ -79,7 +79,7 @@ const SR={
   mastery:'Savladanost',characters:'Znakovi',inRotation:'{a} od {b} u vježbi',drilling:'Najviše se vježba: ',
   settings:'Podešavanja',gExercise:'Vježba',gSending:'Slanje',gAnswering:'Odgovaranje',
   type:'Tip',mChars:'Pojedinačni znakovi',mGroups:'Nasumične grupe',mWords:'Riječi',mCalls:'Pozivni znakovi',
-  charset:'Skup znakova',oKoch:'[[Koch]] redoslijed (počinje sa [[K M]])',oLetters:'Sva slova',oFull:'Slova, brojevi, interpunkcija',
+  charset:'Skup znakova',oKoch:'[[Koch]] redoslijed (počinje sa [[K M]])',oLetters:'Sva slova',oAlnum:'Slova i brojevi',oFull:'Slova, brojevi, interpunkcija',
   shortest:'Najkraće',longest:'Najduže',maxSame:'Isti znak najviše',learnedOnly:'Samo naučeni',onlyRotation:'Samo znakovi u vježbi',
   speed:'Brzina',charGap:'Razmak znakova',wordGap:'Razmak riječi',sendTimes:'Broj slanja',repeatPause:'Pauza ponavljanja',tone:'Ton',volume:'Jačina',
   slowAfter:'Sporo nakon',okPause:'Pauza nakon tačnog',unlockAt:'Otključaj na',recogniser:'Prepoznavanje',eBrowser:'Govorni servis telefona',eOffline:'Oflajn, izbor mikrofona ([[40 MB]])',
@@ -119,7 +119,7 @@ const SR={
     '<p>Kod grupa, riječi i pozivnih znakova odgovor speluješ slovo po slovo. Provjera ide kad izgovoriš onoliko znakova koliko je poslato. Reci <b>[[over]]</b> (ili [[done]]) za raniju provjeru, <b>[[correction]]</b> (ili [[back, delete]]) da obrišeš posljednje slovo. Kucanjem: [[KM]] ili [[kilo mike]], pa [[Enter]].</p>'+
     '<h3>Kako se prilagođava</h3><p>Svaki znak ima ocjenu savladanosti. Promašaji je spuštaju, tačni odgovori podižu, brzi više od sporih. Slabiji znakovi se biraju češće. U <b>[[Koch]]</b> redoslijedu počinješ sa [[K]] i [[M]]; sljedeći znak se otključava kad svi znakovi u vježbi dostignu nivo <b>Otključaj na</b> (uz bar 4 pokušaja po znaku). Panel <b>Savladanost</b> pokazuje ocjene: crveno slabo, narandžasto napreduje, zeleno sigurno. Podrazumijevano je zatvoren da ne otkriva odgovore. Dodirni znak u njemu da ga čuješ (to pauzira vježbu).</p>'+
     '<h3>Podešavanja</h3><dl>'+
-    '<dt>Skup znakova</dt><dd>[[Koch]] redoslijed (postepeno otključavanje), sva slova, ili slova, brojevi i interpunkcija (sve odjednom).</dd>'+
+    '<dt>Skup znakova</dt><dd>[[Koch]] redoslijed (postepeno otključavanje), sva slova, slova i brojevi, ili slova, brojevi i interpunkcija (sve odjednom).</dd>'+
     '<dt>Najkraće / Najduže</dt><dd>Raspon dužine za grupe i riječi.</dd>'+
     '<dt>Isti znak najviše</dt><dd>Koliko puta se isti znak smije pojaviti u grupi, riječi ili pozivnom znaku.</dd>'+
     '<dt>Samo naučeni</dt><dd>Grupe, riječi i pozivni znakovi koriste samo znakove u vježbi. Ako nema dovoljno takvih riječi, dobiješ nasumičnu grupu.</dd>'+

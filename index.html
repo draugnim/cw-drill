@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;500;600;700;800&family=Onest:wght@600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="icon" type="image/svg+xml" href="./img/logo.svg">
 <script>try{var o=JSON.parse(localStorage.getItem('cw-drill-v1')||'{}');if(o.theme==='dark')document.documentElement.dataset.theme='dark'}catch(e){}</script>
-<link rel="stylesheet" href="./style.css?v=16">
+<link rel="stylesheet" href="./style.css?v=17">
 </head>
 <body>
 <div class="wrap">
@@ -69,7 +69,7 @@
 
     <div class="setgroup" data-i18n="gExercise"></div>
     <div class="set"><label for="mode" data-i18n="type"></label><select id="mode"><option value="chars" data-i18n="mChars"></option><option value="groups" data-i18n="mGroups"></option><option value="words" data-i18n="mWords"></option><option value="calls" data-i18n="mCalls"></option></select></div>
-    <div class="set"><label for="order" data-i18n="charset"></label><select id="order"><option value="koch" data-i18n="oKoch"></option><option value="letters" data-i18n="oLetters"></option><option value="full" data-i18n="oFull"></option></select></div>
+    <div class="set"><label for="order" data-i18n="charset"></label><select id="order"><option value="koch" data-i18n="oKoch"></option><option value="letters" data-i18n="oLetters"></option><option value="alnum" data-i18n="oAlnum"></option><option value="full" data-i18n="oFull"></option></select></div>
     <div class="set" data-multi><label for="lenMin" data-i18n="shortest"></label><input type="range" id="lenMin" min="1" max="10" step="1"><output id="lenMinO"></output></div>
     <div class="set" data-multi><label for="lenMax" data-i18n="longest"></label><input type="range" id="lenMax" min="1" max="10" step="1"><output id="lenMaxO"></output></div>
     <div class="set" data-multi><label for="maxSame" data-i18n="maxSame"></label><input type="range" id="maxSame" min="1" max="5" step="1"><output id="maxSameO"></output></div>
@@ -115,6 +115,6 @@
   <div class="sync" id="sync"></div>
 </div>
 </div>
-<script type="module" src="./js/app.js?v=16"></script>
+<script type="module" src="./js/app.js?v=17"></script>
 </body>
 </html>
