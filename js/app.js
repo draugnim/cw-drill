@@ -3,7 +3,7 @@ import {createPlayer} from './morse.js?v=5';
 import {load,save as store} from './storage.js?v=14';
 import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=5';
 import {createMic,hasWebSpeech,canCapture,GRAMMAR} from './recognizer.js?v=13';
-import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=14';
+import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=15';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -154,12 +154,15 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)pa
 function render(){const p=getProg(cfg),o=sequence(cfg);
   $('grid').innerHTML=o.map(c=>{const on=p.active.includes(c),st=p.S[c],s=st.s,pct=st.a?Math.round(s*100):0;
     const col=s<0.4?'var(--red)':s<0.7?'var(--amber)':'var(--green)';
-    return `<div class="cell${on?'':' locked'}" title="${NATO[c]}: ${st.ok}/${st.a} correct"><div class="c">${esc(c)}</div><div class="p">${on?(st.a?pct+'%':'new'):'–'}</div>${on?`<div class="bar" style="width:${Math.max(6,s*100)}%;background:${col}"></div>`:''}</div>`}).join('');
+    return `<div class="cell${on?'':' locked'}" data-c="${esc(c)}" title="${NATO[c]}: ${st.ok}/${st.a} correct"><div class="c">${esc(c)}</div><div class="p">${on?(st.a?pct+'%':'new'):'–'}</div>${on?`<div class="bar" style="width:${Math.max(6,s*100)}%;background:${col}"></div>`:''}</div>`}).join('');
   const learned=p.active.filter(c=>p.S[c].s>=cfg.unlock/100&&p.S[c].a>=4).length;
   $('sAcc').textContent=sess.n?Math.round(100*sess.ok/sess.n)+'%':'–';$('sStr').textContent=sess.streak;$('sLrn').textContent=learned+'/'+o.length;$('sN').textContent=sess.n;
   $('setInfo').textContent=$('mSum').textContent=t('inRotation',{a:p.active.length,b:o.length});
   const weak=p.active.filter(c=>p.S[c].a>0&&p.S[c].s<0.6).sort((a,b)=>p.S[a].s-p.S[b].s).slice(0,5);
   $('weak').innerHTML=weak.length?t('drilling')+weak.map(c=>`<b>${esc(c)}</b> ${NATO[c]}`).join(' · '):''}
+/* tap a character in the mastery grid to hear it (pauses the drill) */
+$('grid').addEventListener('click',e=>{const cell=e.target.closest('.cell');if(!cell)return;const c=cell.dataset.c;if(!MORSE[c])return;
+  if(running)pause();player.audio();setBig(esc(c),'',1);$('pat').textContent=patOf(c);player.play(c,Object.assign({},cfg,{repeats:1}))});
 function renderHist(){const H=cfg.hist||[];
   if(!H.length){$('histBody').innerHTML=`<tr><td colspan="4" class="empty">${t('noAnswers')}</td></tr>`;$('histSum').textContent='';return}
   $('histBody').innerHTML=H.slice().reverse().map(x=>{
