@@ -4,7 +4,8 @@
 
 const VOSK_JS='https://cdn.jsdelivr.net/npm/vosk-browser@0.0.8/dist/vosk.js';
 const MODEL_URL='https://raw.githubusercontent.com/ccoreilly/vosk-browser/gh-pages/models/vosk-model-small-en-us-0.15.tar.gz';
-export const GRAMMAR=['alpha','alfa','bravo','charlie','delta','echo','foxtrot','golf','hotel','india','juliet','kilo','lima','mike','november','oscar','papa','quebec','romeo','sierra','tango','uniform','victor','whiskey','x ray','yankee','zulu',
+/* one spelling per sound: homophones (alpha/alfa) would split the model's confidence between them */
+export const GRAMMAR=['alpha','bravo','charlie','delta','echo','foxtrot','golf','hotel','india','juliet','kilo','lima','mike','november','oscar','papa','quebec','romeo','sierra','tango','uniform','victor','whiskey','x ray','yankee','zulu',
   'zero','one','two','three','four','five','six','seven','eight','nine','niner','stop','comma','question','slash','break',
   'next','nope','pass','skip','over','done','correction','back'];
 const MIN_CONF=0.6;   /* offline: words heard with lower confidence are dropped and the user is asked to repeat */

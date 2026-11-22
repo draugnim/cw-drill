@@ -2,7 +2,7 @@ import {MORSE,NATO,LOOKUP,NOPE,CMD,FULL} from './data.js?v=5';
 import {createPlayer} from './morse.js?v=5';
 import {load,save as store} from './storage.js?v=10';
 import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=5';
-import {createMic,hasWebSpeech,canCapture,GRAMMAR} from './recognizer.js?v=11';
+import {createMic,hasWebSpeech,canCapture,GRAMMAR} from './recognizer.js?v=13';
 import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=12';
 
 const $=id=>document.getElementById(id);
