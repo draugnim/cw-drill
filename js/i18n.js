@@ -14,7 +14,7 @@ const EN={
   charset:'Character set',oKoch:'Koch order (starts with K M)',oLetters:'All letters',oFull:'Letters, numbers, punctuation',
   shortest:'Shortest',longest:'Longest',maxSame:'Same char max',learnedOnly:'Learned only',onlyRotation:'Only characters in rotation',
   speed:'Speed',charGap:'Character gap',wordGap:'Word gap',sendTimes:'Send times',repeatPause:'Repeat pause',tone:'Tone',volume:'Volume',
-  slowAfter:'Slow after',unlockAt:'Unlock at',recogniser:'Recogniser',eBrowser:'Phone’s speech service',eOffline:'Offline, choose mic (40 MB)',
+  slowAfter:'Slow after',okPause:'Pause after correct',unlockAt:'Unlock at',recogniser:'Recogniser',eBrowser:'Phone’s speech service',eOffline:'Offline, choose mic (40 MB)',
   micInput:'Mic input',micAuto:'Auto (earbuds if found)',micN:'Microphone {n}',
   resetProg:'Reset progress for this character set',confirmReset:'Tap again to confirm reset',
   history:'History (last 100)',hSent:'Sent',hYou:'You said',hResult:'Result',hTime:'Time',
@@ -58,6 +58,7 @@ const EN={
     '<dt>Send times / Repeat pause</dt><dd>Send each item several times, with this pause between sendings.</dd>'+
     '<dt>Tone / Volume</dt><dd>Sidetone pitch and loudness.</dd>'+
     '<dt>Slow after</dt><dd>An answer slower than this (counted from the end of sending) is correct but slow, and raises mastery less.</dd>'+
+    '<dt>Pause after correct</dt><dd>How long the correct answer stays on screen before the next character or word is sent.</dd>'+
     '<dt>Unlock at</dt><dd>Mastery needed before Koch adds the next character.</dd>'+
     '<dt>Recogniser</dt><dd><b>Offline</b> (default): downloads a 40 MB model once, then works without internet, listens only for the characters you’re practising, ignores unclear words (so you can repeat them) and lets you choose the mic. <b>Phone’s speech service</b>: the browser’s speech recognition; needs internet and uses the phone’s default mic.</dd>'+
     '<dt>Reset progress</dt><dd>Clears mastery for the current character set.</dd></dl>'+
@@ -78,7 +79,7 @@ const SR={
   charset:'Skup znakova',oKoch:'[[Koch]] redoslijed (počinje sa [[K M]])',oLetters:'Sva slova',oFull:'Slova, brojevi, interpunkcija',
   shortest:'Najkraće',longest:'Najduže',maxSame:'Isti znak najviše',learnedOnly:'Samo naučeni',onlyRotation:'Samo znakovi u vježbi',
   speed:'Brzina',charGap:'Razmak znakova',wordGap:'Razmak riječi',sendTimes:'Broj slanja',repeatPause:'Pauza ponavljanja',tone:'Ton',volume:'Jačina',
-  slowAfter:'Sporo nakon',unlockAt:'Otključaj na',recogniser:'Prepoznavanje',eBrowser:'Govorni servis telefona',eOffline:'Oflajn, izbor mikrofona ([[40 MB]])',
+  slowAfter:'Sporo nakon',okPause:'Pauza nakon tačnog',unlockAt:'Otključaj na',recogniser:'Prepoznavanje',eBrowser:'Govorni servis telefona',eOffline:'Oflajn, izbor mikrofona ([[40 MB]])',
   micInput:'Mikrofon',micAuto:'Automatski (slušalice ako postoje)',micN:'Mikrofon {n}',
   resetProg:'Poništi napredak za ovaj skup znakova',confirmReset:'Dodirni ponovo za potvrdu',
   history:'Istorija (posljednjih 100)',hSent:'Poslato',hYou:'Odgovor',hResult:'Rezultat',hTime:'Vrijeme',
@@ -122,6 +123,7 @@ const SR={
     '<dt>Broj slanja / Pauza ponavljanja</dt><dd>Svaka stavka se šalje više puta, sa ovom pauzom između.</dd>'+
     '<dt>Ton / Jačina</dt><dd>Visina i glasnoća tona.</dd>'+
     '<dt>Sporo nakon</dt><dd>Odgovor sporiji od ovoga (računa se od kraja slanja) je tačan, ali spor, i manje podiže savladanost.</dd>'+
+    '<dt>Pauza nakon tačnog</dt><dd>Koliko dugo tačan odgovor ostaje na ekranu prije slanja sljedećeg znaka ili riječi.</dd>'+
     '<dt>Otključaj na</dt><dd>Savladanost potrebna da [[Koch]] doda sljedeći znak.</dd>'+
     '<dt>Prepoznavanje</dt><dd><b>Oflajn</b> (podrazumijevano): jednom preuzme model od [[40 MB]], zatim radi bez interneta, sluša samo znakove koje vježbaš, zanemaruje nejasne riječi (pa ih možeš ponoviti) i dozvoljava izbor mikrofona. <b>Govorni servis telefona</b>: prepoznavanje govora u pretraživaču; traži internet i koristi podrazumijevani mikrofon telefona.</dd>'+
     '<dt>Poništi napredak</dt><dd>Briše savladanost za trenutni skup znakova.</dd></dl>'+

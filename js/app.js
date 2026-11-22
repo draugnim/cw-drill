@@ -1,9 +1,9 @@
 import {MORSE,NATO,LOOKUP,NOPE,CMD,FULL} from './data.js?v=5';
 import {createPlayer} from './morse.js?v=5';
-import {load,save as store} from './storage.js?v=10';
+import {load,save as store} from './storage.js?v=14';
 import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=5';
 import {createMic,hasWebSpeech,canCapture,GRAMMAR} from './recognizer.js?v=13';
-import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=12';
+import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=14';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -77,7 +77,7 @@ function finish(given,raw){
   const nc=maybeUnlock(cfg);if(nc)$('msg').innerHTML+=` · <span style="color:var(--amber)">${t('newChar',{c:esc(nc),n:NATO[nc]})}</span>`;
   setState('');render();renderHist();persist();
   const after=()=>nc?introNew(nc,next):schedule(next,ok?0:600);
-  if(!ok)say(spell(target),after);else schedule(after,target.length>1?1400:1000);
+  if(!ok)say(spell(target),after);else schedule(after,cfg.okPause*1000);
   return true;
 }
 /* one spelled token while answering a word or callsign */
@@ -181,7 +181,7 @@ armButton('resetB','resetProg','confirmReset',()=>{delete cfg.prog[cfg.order];se
 let syncKey='device';
 function persist(){syncKey=store(cfg)?'saved':'notSaved';$('sync').textContent=t(syncKey)}
 const FMT={wpm:v=>v+' wpm',charGap:v=>v===3?'3 (std)':v+'',wordGap:v=>v===7?'7 (std)':v+'',repeats:v=>v===1?'once':v+'×',repeatGap:v=>v+' s',
-  hz:v=>v+' Hz',vol:v=>v+'%',slow:v=>v+' s',unlock:v=>v+'%',lenMin:v=>v+'',lenMax:v=>v+'',maxSame:v=>v+'×'};
+  hz:v=>v+' Hz',vol:v=>v+'%',slow:v=>v+' s',okPause:v=>v+' s',unlock:v=>v+'%',lenMin:v=>v+'',lenMax:v=>v+'',maxSame:v=>v+'×'};
 for(const id in FMT){const el=$(id);el.value=cfg[id];$(id+'O').textContent=FMT[id](cfg[id]);
   el.addEventListener('input',()=>{cfg[id]=+el.value;
     if(id==='lenMin'&&cfg.lenMin>cfg.lenMax){cfg.lenMax=cfg.lenMin;$('lenMax').value=cfg.lenMax;$('lenMaxO').textContent=cfg.lenMax}
