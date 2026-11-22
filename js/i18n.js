@@ -34,11 +34,12 @@ const EN={
   errClosing:'The mic keeps closing. Tap Open mic to try again.',errDisconnected:'The mic was disconnected.',
   errMicUnavailable:'That mic isn’t available. Pick another in Settings → Mic input.',errOffline:'Couldn’t start the offline recogniser ({x}).',
   recChanged:'Recogniser changed. Tap Open mic again.',switchInputs:'Turn the mic off and on again to switch inputs.',
-  noteOffline:'Offline recogniser: listens only for phonetic words, numbers, “next”, “over” and “correction”. Choose the mic in Settings → Mic input.',
+  noteOffline:'Offline recogniser: listens only for the characters you’re practising, “next”, “over” and “correction”. Unclear words are ignored so you can repeat them. Choose the mic in Settings → Mic input.',
   noteHttps:'The mic needs this page served over https://.',noteNoSpeech:'This browser has no speech service. Switch Settings → Recogniser to Offline.',
   noteBrowser:'Tap <b>Open mic</b> once and keep talking — it reopens by itself after pauses. Headphones help, so the mic doesn’t hear the tone.',
   noteWords:'Not enough words use only your learned characters and length, so this is a random group. Learn more characters, widen the length, or turn off “Only characters in rotation”.',
   noteCalls:'Callsigns need letters and at least one digit, so this one uses all characters. Turn off “Only characters in rotation” to hide this note.',
+  sayAgain:'Didn’t catch that clearly — say it again.',
   language:'Language',toDark:'Switch to dark theme',toLight:'Switch to light theme',
   howTo:'How to use',
   guide:'<h3>Basics</h3><p>Press <b>Start</b>. The app sends Morse; answer by saying the phonetic name (Kilo, Mike, Two, Stop…). If you can’t copy it, say <b>next</b> (or skip, pass) or tap <b>Next</b>: it counts as a miss, the answer is read out and the next one is sent. <b>Replay</b> sends the current item again.</p>'+
@@ -57,7 +58,7 @@ const EN={
     '<dt>Tone / Volume</dt><dd>Sidetone pitch and loudness.</dd>'+
     '<dt>Slow after</dt><dd>An answer slower than this (counted from the end of sending) is correct but slow, and raises mastery less.</dd>'+
     '<dt>Unlock at</dt><dd>Mastery needed before Koch adds the next character.</dd>'+
-    '<dt>Recogniser</dt><dd><b>Offline</b> (default): downloads a 40 MB model once, then works without internet, listens only for drill words and lets you choose the mic. <b>Phone’s speech service</b>: the browser’s speech recognition; needs internet and uses the phone’s default mic.</dd>'+
+    '<dt>Recogniser</dt><dd><b>Offline</b> (default): downloads a 40 MB model once, then works without internet, listens only for the characters you’re practising, ignores unclear words (so you can repeat them) and lets you choose the mic. <b>Phone’s speech service</b>: the browser’s speech recognition; needs internet and uses the phone’s default mic.</dd>'+
     '<dt>Reset progress</dt><dd>Clears mastery for the current character set.</dd></dl>'+
     '<h3>History</h3><p>The last 100 answers: what was sent, what you said (with the recognised text), the result and response time, plus the most-missed characters.</p>'+
     '<h3>Tips and keys</h3><p>Use headphones so the mic doesn’t hear the tone. Settings and progress are saved in this browser only.<br>Keys (outside the text box): <kbd>Space</kbd> start/pause · <kbd>R</kbd> replay · <kbd>N</kbd> next · <kbd>M</kbd> mic</p>'
@@ -96,11 +97,12 @@ const SR={
   errClosing:'Mikrofon se stalno zatvara. Dodirni Uključi mikrofon da pokušaš ponovo.',errDisconnected:'Mikrofon je isključen.',
   errMicUnavailable:'Taj mikrofon nije dostupan. Izaberi drugi u Podešavanja → Mikrofon.',errOffline:'Oflajn prepoznavanje nije pokrenuto ({x}).',
   recChanged:'Prepoznavanje je promijenjeno. Ponovo dodirni Uključi mikrofon.',switchInputs:'Isključi i ponovo uključi mikrofon da promijeniš ulaz.',
-  noteOffline:'Oflajn prepoznavanje sluša samo fonetska imena, brojeve, „[[next]]“, „[[over]]“ i „[[correction]]“. Mikrofon biraš u Podešavanja → Mikrofon.',
+  noteOffline:'Oflajn prepoznavanje sluša samo znakove koje vježbaš, „[[next]]“, „[[over]]“ i „[[correction]]“. Nejasne riječi se zanemaruju pa ih možeš ponoviti. Mikrofon biraš u Podešavanja → Mikrofon.',
   noteHttps:'Mikrofon radi samo kad je stranica na [[https://]].',noteNoSpeech:'Ovaj pretraživač nema govorni servis. Prebaci Podešavanja → Prepoznavanje na Oflajn.',
   noteBrowser:'Dodirni <b>Uključi mikrofon</b> jednom i samo pričaj — sam se ponovo uključuje nakon pauza. Odgovori su na engleskom ([[Kilo, Mike, Two]]…). Slušalice pomažu da mikrofon ne čuje ton.',
   noteWords:'Nema dovoljno riječi samo od naučenih znakova i zadate dužine, pa je ovo nasumična grupa. Nauči još znakova, proširi dužinu ili isključi „Samo znakovi u vježbi“.',
   noteCalls:'Pozivnom znaku trebaju slova i bar jedna cifra, pa ovaj koristi sve znakove. Isključi „Samo znakovi u vježbi“ da sakriješ ovu napomenu.',
+  sayAgain:'Nije razumljivo — ponovi.',
   language:'Jezik',toDark:'Prebaci na tamnu temu',toLight:'Prebaci na svijetlu temu',
   howTo:'Uputstvo',
   guide:'<h3>Osnove</h3><p>Pritisni <b>Start</b>. Aplikacija šalje Morzeov kod, a ti odgovaraš izgovarajući fonetsko ime ([[Kilo, Mike, Two, Stop]]…). Ako nisi primio znak, reci <b>[[next]]</b> (ili [[skip, pass]]) ili dodirni <b>Dalje</b>: računa se kao promašaj, odgovor se pročita naglas i šalje se sljedeći. <b>Ponovi</b> ponovo šalje trenutnu stavku.</p>'+
@@ -119,7 +121,7 @@ const SR={
     '<dt>Ton / Jačina</dt><dd>Visina i glasnoća tona.</dd>'+
     '<dt>Sporo nakon</dt><dd>Odgovor sporiji od ovoga (računa se od kraja slanja) je tačan, ali spor, i manje podiže savladanost.</dd>'+
     '<dt>Otključaj na</dt><dd>Savladanost potrebna da [[Koch]] doda sljedeći znak.</dd>'+
-    '<dt>Prepoznavanje</dt><dd><b>Oflajn</b> (podrazumijevano): jednom preuzme model od [[40 MB]], zatim radi bez interneta, sluša samo riječi iz vježbe i dozvoljava izbor mikrofona. <b>Govorni servis telefona</b>: prepoznavanje govora u pretraživaču; traži internet i koristi podrazumijevani mikrofon telefona.</dd>'+
+    '<dt>Prepoznavanje</dt><dd><b>Oflajn</b> (podrazumijevano): jednom preuzme model od [[40 MB]], zatim radi bez interneta, sluša samo znakove koje vježbaš, zanemaruje nejasne riječi (pa ih možeš ponoviti) i dozvoljava izbor mikrofona. <b>Govorni servis telefona</b>: prepoznavanje govora u pretraživaču; traži internet i koristi podrazumijevani mikrofon telefona.</dd>'+
     '<dt>Poništi napredak</dt><dd>Briše savladanost za trenutni skup znakova.</dd></dl>'+
     '<h3>Istorija</h3><p>Posljednjih 100 odgovora: šta je poslato, šta si rekao (uz prepoznati tekst), rezultat i vrijeme odgovora, te najčešće promašeni znakovi.</p>'+
     '<h3>Savjeti i tasteri</h3><p>Koristi slušalice da mikrofon ne čuje ton. Podešavanja i napredak se čuvaju samo u ovom pretraživaču.<br>Tasteri (van polja za unos): <kbd>[[Space]]</kbd> start/pauza · <kbd>[[R]]</kbd> ponovi · <kbd>[[N]]</kbd> dalje · <kbd>[[M]]</kbd> mikrofon</p>'

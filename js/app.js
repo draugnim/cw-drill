@@ -1,9 +1,9 @@
-import {MORSE,NATO,LOOKUP,NOPE,CMD} from './data.js?v=5';
+import {MORSE,NATO,LOOKUP,NOPE,CMD,FULL} from './data.js?v=5';
 import {createPlayer} from './morse.js?v=5';
 import {load,save as store} from './storage.js?v=10';
 import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=5';
-import {createMic,hasWebSpeech,canCapture} from './recognizer.js?v=8';
-import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=10';
+import {createMic,hasWebSpeech,canCapture,GRAMMAR} from './recognizer.js?v=11';
+import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=11';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -38,7 +38,13 @@ function next(){
   $('pat').textContent='';setState('stListening');$('itemNote').textContent=cur.note?t(cur.note):'';
   if(multi()){showSlots();$('msg').innerHTML=t('spellIt',{n:cur.text.length})}
   else{setBig('?','wait',1);$('msg').innerHTML=t('whatWas')}
-  sendCurrent();render();
+  mic.setVocab(vocabFor());sendCurrent();render();
+}
+/* offline recogniser: only the characters this item can contain, plus next/over/correction */
+function vocabFor(){
+  const all=(cur&&cur.note)||(!cfg.limit&&(cfg.mode==='words'||cfg.mode==='calls'));
+  const set=new Set(all?FULL:getProg(cfg).active);
+  return GRAMMAR.filter(w=>{const g=parseTok(w.split(' ')[0]);return g==='NOPE'||g==='OVER'||g==='BACK'||set.has(g)});
 }
 function pickVoice(){try{const v=speechSynthesis.getVoices();return v.find(x=>/^en[-_]US/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null}catch(e){return null}}
 function say(text,cb){
@@ -89,11 +95,13 @@ function spellToken(tok){
 let ph={id:-1,n:0},micState={on:false,label:''},micSrc={k:'',p:null};
 function micLabel(){$('mic').classList.toggle('on',micState.on);$('micL').textContent=t(micState.label||(micState.on?'micListening':'micOpen'))}
 function micSrcText(){const {k,p}=micSrc;$('micSrc').textContent=!k?'':k==='listeningOn'?t(k,{x:(p&&p.x)||t('defaultMic')}):t(k,p)}
-function onPhrase({id,text,alts,final}){
+function onPhrase({id,text,alts,final,act,unsure}){
   $('live').textContent=text?'“'+text.trim()+'”':'';
+  if(act===false)return;
   if(id!==ph.id)ph={id,n:0};
   const toks=tokens(text);
   if(speaking||performance.now()<ignoreUntil||!running||busy||!cur){ph.n=Math.max(ph.n,toks.length);return}
+  if(final){const e=$('err');if(unsure)e.textContent=t('sayAgain');else if(e.textContent===t('sayAgain'))e.textContent=''}
   if(!multi()){
     if(toks.length<=ph.n)return;
     for(const a of alts){const t=tokens(a).slice(ph.n);
@@ -137,7 +145,7 @@ function pause(){running=false;paused=true;clearTimeout(timer);try{speechSynthes
 $('start').onclick=()=>running?pause():start();
 $('rep').onclick=()=>{if(!cur){$('err').textContent=t('pressStart');return}sendCurrent()};
 $('nope').onclick=()=>{if(!running){$('err').textContent=t('pressStart');return}finish('NOPE',t('nextBtn'))};
-$('mic').onclick=()=>{$('err').textContent='';player.audio();if(mic.on){mic.stop();return}mic.start({engine:cfg.engine,micId:cfg.micId})};
+$('mic').onclick=()=>{$('err').textContent='';player.audio();if(mic.on){mic.stop();return}mic.setVocab(vocabFor());mic.start({engine:cfg.engine,micId:cfg.micId})};
 document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.metaKey||e.ctrlKey)return;const k=e.key.toLowerCase();
   if(k===' '){e.preventDefault();running?pause():start()}else if(k==='r')$('rep').click();else if(k==='n')$('nope').click();else if(k==='m'&&!$('mic').hidden)$('mic').click()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)pause()});

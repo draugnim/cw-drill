@@ -4,16 +4,17 @@
 
 const VOSK_JS='https://cdn.jsdelivr.net/npm/vosk-browser@0.0.8/dist/vosk.js';
 const MODEL_URL='https://raw.githubusercontent.com/ccoreilly/vosk-browser/gh-pages/models/vosk-model-small-en-us-0.15.tar.gz';
-const GRAMMAR=['alpha','alfa','bravo','charlie','delta','echo','foxtrot','golf','hotel','india','juliet','kilo','lima','mike','november','oscar','papa','quebec','romeo','sierra','tango','uniform','victor','whiskey','x ray','yankee','zulu',
+export const GRAMMAR=['alpha','alfa','bravo','charlie','delta','echo','foxtrot','golf','hotel','india','juliet','kilo','lima','mike','november','oscar','papa','quebec','romeo','sierra','tango','uniform','victor','whiskey','x ray','yankee','zulu',
   'zero','one','two','three','four','five','six','seven','eight','nine','niner','stop','comma','question','slash','break',
-  'next','nope','pass','skip','over','done','correction','back','[unk]'];
+  'next','nope','pass','skip','over','done','correction','back'];
+const MIN_CONF=0.6;   /* offline: words heard with lower confidence are dropped and the user is asked to repeat */
 const BT=/bluetooth|buds|airpods|hands-?free|\bsco\b/i;
 
 export const hasWebSpeech=!!(window.SpeechRecognition||window.webkitSpeechRecognition);
 export const canCapture=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.isSecureContext);
 
 export function createMic({onPhrase,onState,onError,onSource,audio}){
-  let on=false,engine='browser',micId='',phraseId=0;
+  let on=false,engine='browser',micId='',phraseId=0,vocab=GRAMMAR,rate=48000;
 
   /* ----- engine 1: the phone's own speech service ----- */
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -60,15 +61,25 @@ export function createMic({onPhrase,onState,onError,onSource,audio}){
       if(!micId){const d=await listMics(),bt=d.find(x=>BT.test(x.label)),cur=(s.getAudioTracks()[0]||{}).label||'';
         if(bt&&!BT.test(cur)){try{const s2=await openStream(bt.deviceId);s.getTracks().forEach(t=>t.stop());s=s2}catch(e){}}}}
     if(!on){s.getTracks().forEach(t=>t.stop());return}
-    stream=s;const ac=audio();
-    vrec=new m.KaldiRecognizer(ac.sampleRate,JSON.stringify(GRAMMAR));phraseId++;
-    vrec.on('partialresult',msg=>{const t=(msg.result&&msg.result.partial)||'';if(t)onPhrase({id:phraseId,text:t,alts:[t],final:false})});
-    vrec.on('result',msg=>{const t=(msg.result&&msg.result.text)||'';onPhrase({id:phraseId,text:t,alts:[t],final:true});phraseId++});
+    stream=s;const ac=audio();rate=ac.sampleRate;
+    vrec=makeRec(m);
     src=ac.createMediaStreamSource(s);proc=ac.createScriptProcessor(4096,1,1);mute=ac.createGain();mute.gain.value=0;
     proc.onaudioprocess=e=>{if(on&&vrec)try{vrec.acceptWaveform(e.inputBuffer)}catch(err){}};
     src.connect(proc);proc.connect(mute);mute.connect(ac.destination);
     onState(true);onSource('listeningOn',{x:((s.getAudioTracks()[0]||{}).label)||''});
     s.getAudioTracks()[0].onended=()=>{if(on){on=false;voskStop();onState(false);onError('errDisconnected')}};
+  }
+  /* recogniser limited to the current word list; partial results are only shown, final ones carry confidence */
+  function makeRec(m){
+    const r=new m.KaldiRecognizer(rate,JSON.stringify(vocab.concat('[unk]')));
+    try{r.setWords(true)}catch(e){}
+    phraseId++;
+    r.on('partialresult',msg=>{const t=(msg.result&&msg.result.partial)||'';if(t)onPhrase({id:phraseId,text:t,alts:[t],final:false,act:false})});
+    r.on('result',msg=>{const res=msg.result||{},ws=res.result||[];let text=res.text||'',unsure=false;
+      if(ws.length){const good=ws.filter(w=>w.word!=='[unk]'&&!(w.conf<MIN_CONF));unsure=good.length<ws.length;text=good.map(w=>w.word).join(' ')}
+      else if(text.includes('[unk]')){unsure=true;text=text.replace(/\[unk\]/g,' ').trim()}
+      if(text||unsure)onPhrase({id:phraseId,text,alts:[text],final:true,unsure});phraseId++});
+    return r;
   }
   function voskStop(){
     try{proc&&(proc.onaudioprocess=null);src&&src.disconnect();proc&&proc.disconnect();mute&&mute.disconnect()}catch(e){}
@@ -79,6 +90,9 @@ export function createMic({onPhrase,onState,onError,onSource,audio}){
   return {
     get on(){return on},
     listMics,
+    /* words the offline recogniser may hear; rebuilt on the fly when the list changes */
+    setVocab(list){const v=list&&list.length?list:GRAMMAR;if(v.join('|')===vocab.join('|'))return;vocab=v;
+      if(vrec&&model){try{vrec.remove()}catch(e){}vrec=makeRec(model)}},
     async start(opts){
       engine=opts.engine;micId=opts.micId||'';on=true;restarts=0;onState(true,'micRequesting');
       if(engine==='offline'){
