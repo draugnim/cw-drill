@@ -1,9 +1,9 @@
 import {MORSE,NATO,LOOKUP,NOPE,CMD} from './data.js?v=5';
 import {createPlayer} from './morse.js?v=5';
-import {load,save as store} from './storage.js?v=5';
+import {load,save as store} from './storage.js?v=10';
 import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=5';
 import {createMic,hasWebSpeech,canCapture} from './recognizer.js?v=8';
-import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=8';
+import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=10';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -195,7 +195,7 @@ function micNote(){
   if(!hasWebSpeech){$('mic').hidden=true;$('micNote').textContent=t('noteNoSpeech');return}
   if(!window.isSecureContext){$('mic').hidden=true;$('micNote').textContent=t('noteHttps');return}
   $('mic').hidden=false;$('micNote').innerHTML=t('noteBrowser')}
-$('engine').value=cfg.engine;$('engine').addEventListener('change',()=>{const was=mic.on;if(was)mic.stop();cfg.engine=$('engine').value;persist();micNote();if(cfg.engine==='offline')listMics();if(was)$('err').textContent=t('recChanged')});
+$('engine').value=cfg.engine;$('engine').addEventListener('change',()=>{const was=mic.on;if(was)mic.stop();cfg.engine=$('engine').value;cfg.engineChosen=true;persist();micNote();if(cfg.engine==='offline')listMics();if(was)$('err').textContent=t('recChanged')});
 $('micDev').addEventListener('change',()=>{cfg.micId=$('micDev').value;persist();if(mic.on&&cfg.engine==='offline')$('err').textContent=t('switchInputs')});
 if(navigator.mediaDevices&&navigator.mediaDevices.addEventListener)navigator.mediaDevices.addEventListener('devicechange',()=>{if(cfg.engine==='offline')listMics()});
 

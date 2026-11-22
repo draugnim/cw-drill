@@ -4,7 +4,7 @@ export const DEF={
   mode:'chars',order:'koch',
   wpm:22,charGap:3,wordGap:7,repeats:1,repeatGap:1,hz:600,vol:50,
   lenMin:3,lenMax:5,maxSame:2,limit:true,
-  slow:3,unlock:80,engine:'browser',micId:'',showMastery:false,lang:'',theme:'light',
+  slow:3,unlock:80,engine:'offline',engineChosen:false,micId:'',showMastery:false,lang:'',theme:'light',
   hist:[],prog:{}
 };
 const KEYS=Object.keys(DEF).filter(k=>k!=='hist'&&k!=='prog');
@@ -14,6 +14,7 @@ export function load(){
   try{const o=JSON.parse(localStorage.getItem(LS)||'null');
     if(o&&typeof o==='object'){
       for(const k of KEYS)if(o[k]!==undefined&&typeof o[k]===typeof DEF[k])cfg[k]=o[k];
+      if(!o.engineChosen)cfg.engine=DEF.engine;
       if(Array.isArray(o.hist))cfg.hist=o.hist.slice(-100);
       if(o.prog&&typeof o.prog==='object')cfg.prog=o.prog;
     }}catch(e){}

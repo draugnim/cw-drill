@@ -57,7 +57,7 @@ const EN={
     '<dt>Tone / Volume</dt><dd>Sidetone pitch and loudness.</dd>'+
     '<dt>Slow after</dt><dd>An answer slower than this (counted from the end of sending) is correct but slow, and raises mastery less.</dd>'+
     '<dt>Unlock at</dt><dd>Mastery needed before Koch adds the next character.</dd>'+
-    '<dt>Recogniser</dt><dd><b>Phone’s speech service</b>: the browser’s speech recognition; needs internet and uses the phone’s default mic. <b>Offline</b>: downloads a 40 MB model once, then works without internet, listens only for drill words and lets you choose the mic.</dd>'+
+    '<dt>Recogniser</dt><dd><b>Offline</b> (default): downloads a 40 MB model once, then works without internet, listens only for drill words and lets you choose the mic. <b>Phone’s speech service</b>: the browser’s speech recognition; needs internet and uses the phone’s default mic.</dd>'+
     '<dt>Reset progress</dt><dd>Clears mastery for the current character set.</dd></dl>'+
     '<h3>History</h3><p>The last 100 answers: what was sent, what you said (with the recognised text), the result and response time, plus the most-missed characters.</p>'+
     '<h3>Tips and keys</h3><p>Use headphones so the mic doesn’t hear the tone. Settings and progress are saved in this browser only.<br>Keys (outside the text box): <kbd>Space</kbd> start/pause · <kbd>R</kbd> replay · <kbd>N</kbd> next · <kbd>M</kbd> mic</p>'
@@ -119,7 +119,7 @@ const SR={
     '<dt>Ton / Jačina</dt><dd>Visina i glasnoća tona.</dd>'+
     '<dt>Sporo nakon</dt><dd>Odgovor sporiji od ovoga (računa se od kraja slanja) je tačan, ali spor, i manje podiže savladanost.</dd>'+
     '<dt>Otključaj na</dt><dd>Savladanost potrebna da [[Koch]] doda sljedeći znak.</dd>'+
-    '<dt>Prepoznavanje</dt><dd><b>Govorni servis telefona</b>: prepoznavanje govora u pretraživaču; traži internet i koristi podrazumijevani mikrofon telefona. <b>Oflajn</b>: jednom preuzme model od [[40 MB]], zatim radi bez interneta, sluša samo riječi iz vježbe i dozvoljava izbor mikrofona.</dd>'+
+    '<dt>Prepoznavanje</dt><dd><b>Oflajn</b> (podrazumijevano): jednom preuzme model od [[40 MB]], zatim radi bez interneta, sluša samo riječi iz vježbe i dozvoljava izbor mikrofona. <b>Govorni servis telefona</b>: prepoznavanje govora u pretraživaču; traži internet i koristi podrazumijevani mikrofon telefona.</dd>'+
     '<dt>Poništi napredak</dt><dd>Briše savladanost za trenutni skup znakova.</dd></dl>'+
     '<h3>Istorija</h3><p>Posljednjih 100 odgovora: šta je poslato, šta si rekao (uz prepoznati tekst), rezultat i vrijeme odgovora, te najčešće promašeni znakovi.</p>'+
     '<h3>Savjeti i tasteri</h3><p>Koristi slušalice da mikrofon ne čuje ton. Podešavanja i napredak se čuvaju samo u ovom pretraživaču.<br>Tasteri (van polja za unos): <kbd>[[Space]]</kbd> start/pauza · <kbd>[[R]]</kbd> ponovi · <kbd>[[N]]</kbd> dalje · <kbd>[[M]]</kbd> mikrofon</p>'
