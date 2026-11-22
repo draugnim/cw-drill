@@ -3,14 +3,14 @@ import {MORSE} from './data.js?v=5';
 /* Sidetone player. Timing in "dits" at the character speed:
    dit 1, dah 3, gap inside a character 1, between characters charGap (standard 3),
    between words wordGap (standard 7). Larger gaps = Farnsworth-style spacing. */
-export function createPlayer(led){
+export function createPlayer(led,band){
   let ctx=null,osc=null,timers=[];
   function audio(){if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();if(ctx.state==='suspended')ctx.resume();return ctx}
-  function stop(){try{osc&&osc.stop()}catch(e){}osc=null;timers.forEach(clearTimeout);timers=[];led&&led.classList.remove('on')}
+  function stop(){try{osc&&osc.stop()}catch(e){}if(osc&&band)band.cut();osc=null;timers.forEach(clearTimeout);timers=[];led&&led.classList.remove('on')}
   /* returns performance.now() timestamps: end of the first sending and end of the last repeat */
   function play(text,o){
     stop();const c=audio(),u=1.2/o.wpm,r=0.005,amp=o.vol/100*0.6;
-    osc=c.createOscillator();const g=c.createGain();osc.frequency.value=o.hz;g.gain.value=0;osc.connect(g).connect(c.destination);
+    osc=c.createOscillator();const g=c.createGain();osc.frequency.value=o.hz;g.gain.value=0;osc.connect(g).connect(band?band.attach(c):c.destination);
     const t0=c.currentTime+0.08;let t=t0,firstEnd=t0;
     const words=String(text).split(' ').filter(Boolean);
     const reps=Math.max(1,o.repeats||1);
@@ -31,7 +31,7 @@ export function createPlayer(led){
       if(rep===0)firstEnd=t;
       if(rep<reps-1)t+=Math.max(o.repeatGap||1,o.wordGap*u);
     }
-    osc.start(t0-0.01);osc.stop(t+0.05);
+    osc.start(t0-0.01);osc.stop(t+0.05);if(band)band.window(t0,t);
     const now=performance.now(),base=c.currentTime;
     return {firstEnd:now+(firstEnd-base)*1000,end:now+(t-base)*1000};
   }

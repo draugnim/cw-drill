@@ -1,14 +1,16 @@
 import {MORSE,NATO,LOOKUP,NOPE,CMD,FULL} from './data.js?v=5';
-import {createPlayer} from './morse.js?v=5';
-import {load,save as store} from './storage.js?v=14';
+import {createPlayer} from './morse.js?v=16';
+import {createBand} from './band.js?v=16';
+import {load,save as store} from './storage.js?v=16';
 import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=5';
 import {createMic,hasWebSpeech,canCapture,GRAMMAR} from './recognizer.js?v=13';
-import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=15';
+import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=16';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const cfg=load();
-const player=createPlayer($('led'));
+const band=createBand();band.config(cfg);
+const player=createPlayer($('led'),band);
 setLang(cfg.lang||pickDefault());
 
 let cur=null,last=null,buf=[],rawWords=[],busy=false,running=false,times={firstEnd:0,end:0},timer=null;
@@ -139,8 +141,8 @@ $('ans').addEventListener('keydown',e=>{if(e.key!=='Enter')return;
 let paused=false,stateKey='stReady';
 function setState(k){stateKey=k;$('state').textContent=k?t(k):''}
 function startLabel(){$('startL').textContent=t(running?'pause':'start')}
-function start(){player.audio();running=true;paused=false;startLabel();$('start').querySelector('svg').innerHTML='<path d="M8 5v14M16 5v14"/>';next()}
-function pause(){running=false;paused=true;clearTimeout(timer);try{speechSynthesis.cancel()}catch(e){}speaking=false;player.stop();busy=false;
+function start(){player.audio();running=true;band.run(true);paused=false;startLabel();$('start').querySelector('svg').innerHTML='<path d="M8 5v14M16 5v14"/>';next()}
+function pause(){running=false;paused=true;band.run(false);clearTimeout(timer);try{speechSynthesis.cancel()}catch(e){}speaking=false;player.stop();busy=false;
   startLabel();$('start').querySelector('svg').innerHTML='<path d="M7 4v16l13-8z"/>';setState('stPaused');$('msg').innerHTML=t('pausedMsg');render()}
 $('start').onclick=()=>running?pause():start();
 $('rep').onclick=()=>{if(!cur){$('err').textContent=t('pressStart');return}sendCurrent()};
@@ -183,13 +185,15 @@ armButton('resetB','resetProg','confirmReset',()=>{delete cfg.prog[cfg.order];se
 /* ---------- settings ---------- */
 let syncKey='device';
 function persist(){syncKey=store(cfg)?'saved':'notSaved';$('sync').textContent=t(syncKey)}
+const pct=v=>v?v+'%':'–';
 const FMT={wpm:v=>v+' wpm',charGap:v=>v===3?'3 (std)':v+'',wordGap:v=>v===7?'7 (std)':v+'',repeats:v=>v===1?'once':v+'×',repeatGap:v=>v+' s',
-  hz:v=>v+' Hz',vol:v=>v+'%',slow:v=>v+' s',okPause:v=>v+' s',unlock:v=>v+'%',lenMin:v=>v+'',lenMax:v=>v+'',maxSame:v=>v+'×'};
+  hz:v=>v+' Hz',vol:v=>v+'%',slow:v=>v+' s',okPause:v=>v+' s',noise:pct,qsb:pct,qrn:pct,qrm:pct,unlock:v=>v+'%',lenMin:v=>v+'',lenMax:v=>v+'',maxSame:v=>v+'×'};
 for(const id in FMT){const el=$(id);el.value=cfg[id];$(id+'O').textContent=FMT[id](cfg[id]);
   el.addEventListener('input',()=>{cfg[id]=+el.value;
     if(id==='lenMin'&&cfg.lenMin>cfg.lenMax){cfg.lenMax=cfg.lenMin;$('lenMax').value=cfg.lenMax;$('lenMaxO').textContent=cfg.lenMax}
     if(id==='lenMax'&&cfg.lenMax<cfg.lenMin){cfg.lenMin=cfg.lenMax;$('lenMin').value=cfg.lenMin;$('lenMinO').textContent=cfg.lenMin}
-    $(id+'O').textContent=FMT[id](cfg[id]);persist()})}
+    $(id+'O').textContent=FMT[id](cfg[id]);persist();band.config(cfg)})}
+$('bandWhen').value=cfg.bandWhen;$('bandWhen').addEventListener('change',()=>{cfg.bandWhen=$('bandWhen').value;persist();band.config(cfg)});
 $('masteryBox').open=cfg.showMastery;$('masteryBox').addEventListener('toggle',()=>{cfg.showMastery=$('masteryBox').open;persist()});
 $('limit').checked=cfg.limit;$('limit').addEventListener('change',()=>{cfg.limit=$('limit').checked;persist()});
 function modeUI(){document.querySelectorAll('[data-multi]').forEach(el=>el.hidden=!multi());
