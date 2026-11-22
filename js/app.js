@@ -3,7 +3,7 @@ import {createPlayer} from './morse.js?v=5';
 import {load,save as store} from './storage.js?v=10';
 import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=5';
 import {createMic,hasWebSpeech,canCapture,GRAMMAR} from './recognizer.js?v=11';
-import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=11';
+import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=12';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -40,11 +40,11 @@ function next(){
   else{setBig('?','wait',1);$('msg').innerHTML=t('whatWas')}
   mic.setVocab(vocabFor());sendCurrent();render();
 }
-/* offline recogniser: only the characters this item can contain, plus next/over/correction */
+/* offline recogniser: only the characters this item can contain, plus next (and over/correction when spelling) */
 function vocabFor(){
   const all=(cur&&cur.note)||(!cfg.limit&&(cfg.mode==='words'||cfg.mode==='calls'));
   const set=new Set(all?FULL:getProg(cfg).active);
-  return GRAMMAR.filter(w=>{const g=parseTok(w.split(' ')[0]);return g==='NOPE'||g==='OVER'||g==='BACK'||set.has(g)});
+  return GRAMMAR.filter(w=>{const g=parseTok(w.split(' ')[0]);return g==='NOPE'||(multi()&&(g==='OVER'||g==='BACK'))||set.has(g)});
 }
 function pickVoice(){try{const v=speechSynthesis.getVoices();return v.find(x=>/^en[-_]US/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null}catch(e){return null}}
 function say(text,cb){
@@ -191,7 +191,7 @@ $('masteryBox').open=cfg.showMastery;$('masteryBox').addEventListener('toggle',(
 $('limit').checked=cfg.limit;$('limit').addEventListener('change',()=>{cfg.limit=$('limit').checked;persist()});
 function modeUI(){document.querySelectorAll('[data-multi]').forEach(el=>el.hidden=!multi());
   $('ans').placeholder=t(multi()?'phMulti':'phSingle');$('ans').enterKeyHint='done'}
-$('mode').value=cfg.mode;$('mode').addEventListener('change',()=>{cfg.mode=$('mode').value;$('ans').value='';proc=0;if(running)pause();cur=null;$('itemNote').textContent='';modeUI();persist()});
+$('mode').value=cfg.mode;$('mode').addEventListener('change',()=>{cfg.mode=$('mode').value;$('ans').value='';proc=0;if(running)pause();cur=null;$('itemNote').textContent='';modeUI();micNote();mic.setVocab(vocabFor());persist()});
 $('order').value=cfg.order;$('order').addEventListener('change',()=>{cfg.order=$('order').value;cur=null;if(running)pause();render();persist()});
 
 async function listMics(){const d=await mic.listMics(),sel=$('micDev');
@@ -199,7 +199,7 @@ async function listMics(){const d=await mic.listMics(),sel=$('micDev');
   sel.value=d.some(x=>x.deviceId===cfg.micId)?cfg.micId:''}
 function micNote(){
   const off=cfg.engine==='offline';$('micDevRow').hidden=!off;
-  if(off){$('mic').hidden=!canCapture;$('micNote').innerHTML=t(canCapture?'noteOffline':'noteHttps');return}
+  if(off){$('mic').hidden=!canCapture;$('micNote').innerHTML=t(canCapture?(multi()?'noteOffline':'noteOfflineChars'):'noteHttps');return}
   if(!hasWebSpeech){$('mic').hidden=true;$('micNote').textContent=t('noteNoSpeech');return}
   if(!window.isSecureContext){$('mic').hidden=true;$('micNote').textContent=t('noteHttps');return}
   $('mic').hidden=false;$('micNote').innerHTML=t('noteBrowser')}
