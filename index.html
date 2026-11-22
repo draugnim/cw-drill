@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;500;600;700;800&family=Onest:wght@600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="icon" type="image/svg+xml" href="./img/logo.svg">
 <script>try{var o=JSON.parse(localStorage.getItem('cw-drill-v1')||'{}');if(o.theme==='dark')document.documentElement.dataset.theme='dark'}catch(e){}</script>
-<link rel="stylesheet" href="./style.css?v=17">
+<link rel="stylesheet" href="./style.css?v=18">
 </head>
 <body>
 <div class="wrap">
@@ -89,6 +89,7 @@
     <div class="set"><label for="qsb" data-i18n="qsb"></label><input type="range" id="qsb" min="0" max="100" step="5"><output id="qsbO"></output></div>
     <div class="set"><label for="qrn" data-i18n="qrn"></label><input type="range" id="qrn" min="0" max="100" step="5"><output id="qrnO"></output></div>
     <div class="set"><label for="qrm" data-i18n="qrm"></label><input type="range" id="qrm" min="0" max="100" step="5"><output id="qrmO"></output></div>
+    <div class="set"><label for="bw" data-i18n="bwLbl"></label><select id="bw"><option value="250" data-i18n="bw250"></option><option value="500" data-i18n="bw500"></option><option value="2400" data-i18n="bw2400"></option></select></div>
     <div class="set"><label for="bandWhen" data-i18n="bandWhen"></label><select id="bandWhen"><option value="send" data-i18n="bwSend"></option><option value="always" data-i18n="bwAlways"></option></select></div>
     <div class="warn" data-i18n="bandWarn"></div>
 
@@ -115,6 +116,6 @@
   <div class="sync" id="sync"></div>
 </div>
 </div>
-<script type="module" src="./js/app.js?v=17"></script>
+<script type="module" src="./js/app.js?v=18"></script>
 </body>
 </html>

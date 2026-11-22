@@ -1,10 +1,10 @@
 import {MORSE,NATO,LOOKUP,NOPE,CMD,FULL} from './data.js?v=5';
-import {createPlayer} from './morse.js?v=16';
-import {createBand} from './band.js?v=16';
-import {load,save as store} from './storage.js?v=16';
+import {createPlayer} from './morse.js?v=18';
+import {createBand} from './band.js?v=18';
+import {load,save as store} from './storage.js?v=18';
 import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=17';
 import {createMic,hasWebSpeech,canCapture,GRAMMAR} from './recognizer.js?v=13';
-import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=17';
+import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=18';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -193,6 +193,7 @@ for(const id in FMT){const el=$(id);el.value=cfg[id];$(id+'O').textContent=FMT[i
     if(id==='lenMin'&&cfg.lenMin>cfg.lenMax){cfg.lenMax=cfg.lenMin;$('lenMax').value=cfg.lenMax;$('lenMaxO').textContent=cfg.lenMax}
     if(id==='lenMax'&&cfg.lenMax<cfg.lenMin){cfg.lenMin=cfg.lenMax;$('lenMin').value=cfg.lenMin;$('lenMinO').textContent=cfg.lenMin}
     $(id+'O').textContent=FMT[id](cfg[id]);persist();band.config(cfg)})}
+$('bw').value=String(cfg.bw);$('bw').addEventListener('change',()=>{cfg.bw=+$('bw').value;persist();band.config(cfg)});
 $('bandWhen').value=cfg.bandWhen;$('bandWhen').addEventListener('change',()=>{cfg.bandWhen=$('bandWhen').value;persist();band.config(cfg)});
 $('masteryBox').open=cfg.showMastery;$('masteryBox').addEventListener('toggle',()=>{cfg.showMastery=$('masteryBox').open;persist()});
 $('limit').checked=cfg.limit;$('limit').addEventListener('change',()=>{cfg.limit=$('limit').checked;persist()});
