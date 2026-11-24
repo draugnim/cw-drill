@@ -4,7 +4,7 @@ import {createBand} from './band.js?v=18';
 import {load,save as store} from './storage.js?v=18';
 import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=17';
 import {createMic,hasWebSpeech,canCapture,GRAMMAR} from './recognizer.js?v=19';
-import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=19';
+import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=20';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -36,7 +36,7 @@ function schedule(fn,ms){clearTimeout(timer);timer=setTimeout(fn,ms)}
 function sendCurrent(){times=player.play(cur.text,cfg)}
 function next(){
   if(!running)return;
-  cur=nextItem(cfg,last&&last.text);last=cur;buf=[];rawWords=[];busy=false;
+  cur=nextItem(cfg,last&&last.text);last=cur;buf=[];rawWords=[];busy=false;$('ans').value='';
   $('pat').textContent='';setState('stListening');$('itemNote').textContent=cur.note?t(cur.note):'';
   if(multi()){showSlots();$('msg').innerHTML=t('spellIt',{n:cur.text.length})}
   else{setBig('?','wait',1);$('msg').innerHTML=t('whatWas')}
@@ -127,20 +127,18 @@ const mic=createMic({
   onSource:(k,p)=>{micSrc={k,p};micSrcText()}
 });
 
-/* ---------- typed answers ---------- */
-let proc=0;
-function typedToString(v){let s='';for(const t of tokens(v)){const g=parseTok(t);
-    if(g==='NOPE')return 'NOPE';if(g&&g.length===1){s+=g;continue}if(g&&g!=='BAD')continue;
-    const u=t.toUpperCase();if(/^[A-Z0-9.,?/=]+$/.test(u))s+=u}return s}
-$('ans').addEventListener('input',()=>{$('err').textContent='';if(multi())return;
-  const v=$('ans').value;if(v.length<proc)proc=v.length;const tk=tokens(v.slice(proc));
-  for(let i=tk.length-1;i>=0;i--){const g=parseTok(tk[i]);if(g&&(g.length===1||g==='NOPE')){const raw=v.slice(proc);proc=v.length;if(!finish(g,raw)&&!running)$('err').textContent=t('pressStart');return}}});
-$('ans').addEventListener('keydown',e=>{if(e.key!=='Enter')return;
-  const v=multi()?$('ans').value:$('ans').value.slice(proc);$('ans').value='';proc=0;
-  if(!running){$('err').textContent=t('pressStart');return}
-  const s=typedToString(v);
-  if(!s){$('err').textContent=t('notRecognised');return}
-  if(s!=='NOPE'&&!multi())finish(s[s.length-1],v);else finish(s,v)});
+/* ---------- typed answers: just the characters; checked automatically, the box clears itself ---------- */
+const typedChars=v=>[...String(v).toUpperCase()].filter(c=>MORSE[c]).join('');
+$('ans').addEventListener('input',()=>{
+  const el=$('ans');$('err').textContent='';
+  if(!running){if(el.value.trim())$('err').textContent=t('pressStart');el.value='';return}
+  if(!cur||busy){el.value='';return}
+  const s=typedChars(el.value);
+  if(!multi()){el.value='';if(s)finish(s[s.length-1],s[s.length-1]);return}
+  if(el.value!==s)el.value=s;buf=[...s];showSlots();
+  if(s.length>=cur.text.length){el.value='';finish(s.slice(0,cur.text.length),s)}});
+$('ans').addEventListener('keydown',e=>{if(e.key!=='Enter')return;e.preventDefault();
+  const s=typedChars($('ans').value);if(running&&cur&&!busy&&multi()&&s){$('ans').value='';finish(s,s)}});
 
 /* ---------- controls ---------- */
 let paused=false,stateKey='stReady';
@@ -204,7 +202,7 @@ $('masteryBox').open=cfg.showMastery;$('masteryBox').addEventListener('toggle',(
 $('limit').checked=cfg.limit;$('limit').addEventListener('change',()=>{cfg.limit=$('limit').checked;persist()});
 function modeUI(){document.querySelectorAll('[data-multi]').forEach(el=>el.hidden=!multi());
   $('ans').placeholder=t(multi()?'phMulti':'phSingle');$('ans').enterKeyHint='done'}
-$('mode').value=cfg.mode;$('mode').addEventListener('change',()=>{cfg.mode=$('mode').value;$('ans').value='';proc=0;if(running)pause();cur=null;$('itemNote').textContent='';modeUI();micNote();mic.setVocab(vocabFor());persist()});
+$('mode').value=cfg.mode;$('mode').addEventListener('change',()=>{cfg.mode=$('mode').value;$('ans').value='';if(running)pause();cur=null;$('itemNote').textContent='';modeUI();micNote();mic.setVocab(vocabFor());persist()});
 $('order').value=cfg.order;$('order').addEventListener('change',()=>{cfg.order=$('order').value;cur=null;if(running)pause();render();persist()});
 
 async function listMics(){const d=await mic.listMics(),sel=$('micDev');

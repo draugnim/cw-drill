@@ -6,7 +6,7 @@ const EN={
   stReady:'ready',stListening:'listening',stPaused:'paused',
   intro:'Press <b>Start</b>, then answer with phonetic names, or say <b>next</b> to skip.',
   start:'Start',pause:'Pause',replay:'Replay',next:'Next',nextTitle:'Skip — counts as a miss and tells you the answer',
-  phSingle:'Or type: kilo, two, stop…',phMulti:'Type KM or kilo mike, then Enter',
+  phSingle:'Or type the character',phMulti:'Or type the characters',
   accuracy:'Accuracy',streak:'Streak',learned:'Learned',answers:'Answers',
   mastery:'Mastery',characters:'Characters',inRotation:'{a} of {b} in rotation',drilling:'Drilling most: ',
   settings:'Settings',gExercise:'Exercise',gSending:'Sending',gAnswering:'Answering',
@@ -47,9 +47,9 @@ const EN={
   howTo:'How to use',
   guide:'<h3>Basics</h3><p>Press <b>Start</b>. The app sends Morse; answer by saying the phonetic name (Kilo, Mike, Two, Stop…). If you can’t copy it, say <b>next</b> (or skip, pass) or tap <b>Next</b>: it counts as a miss, the answer is read out and the next one is sent. <b>Replay</b> sends the current item again.</p>'+
     '<p>Voice commands: <b>replay</b> (or repeat) sends it again, <b>pause</b> pauses the drill, <b>continue</b> (or resume) starts it again.</p>'+
-    '<p>Tap <b>Open mic</b> once and it stays open. You can also type in the box instead of speaking.</p>'+
+    '<p>Tap <b>Open mic</b> once and it stays open. You can also type the character itself in the box instead of speaking; the box clears after each answer.</p>'+
     '<h3>Exercise types</h3><ul><li><b>Single characters</b> — one character at a time, answered with one word.</li><li><b>Random groups</b> — random groups made from your characters.</li><li><b>Words</b> — common English words.</li><li><b>Callsigns</b> — realistic calls: a real ITU prefix, call-area digit and 1–3 letter suffix, sometimes /P or /M.</li></ul>'+
-    '<p>For groups, words and callsigns, spell the answer letter by letter. It is checked once you have given as many characters as were sent. Say <b>over</b> (or done) to check early, <b>correction</b> (or back, delete) to remove the last letter. Typing: KM or kilo mike, then Enter.</p>'+
+    '<p>For groups, words and callsigns, spell the answer letter by letter. It is checked once you have given as many characters as were sent. Say <b>over</b> (or done) to check early, <b>correction</b> (or back, delete) to remove the last letter. When typing, just type the characters (e.g. KM): it checks once you have typed enough, or press Enter to check early.</p>'+
     '<h3>How it adapts</h3><p>Every character has a mastery score. Misses lower it, correct answers raise it, fast ones more than slow ones. Weak characters are picked more often. In <b>Koch order</b> you start with K and M; the next character unlocks when every character in rotation reaches the <b>Unlock at</b> level (with at least 4 attempts each). The <b>Mastery</b> panel shows the scores: red weak, amber improving, green solid. It is closed by default so it doesn’t give answers away. Tap a character there to hear it (this pauses the drill).</p>'+
     '<h3>Settings</h3><dl>'+
     '<dt>Character set</dt><dd>Koch order (unlocks gradually), all letters, letters and numbers, or letters, numbers and punctuation (all at once).</dd>'+
@@ -75,7 +75,7 @@ const SR={
   stReady:'spremno',stListening:'slušam',stPaused:'pauza',
   intro:'Pritisni <b>Start</b>, pa odgovaraj fonetskim imenima ([[Kilo, Mike, Two]]…) ili reci <b>[[next]]</b> za preskakanje.',
   start:'Start',pause:'Pauza',replay:'Ponovi',next:'Dalje',nextTitle:'Preskoči — računa se kao promašaj i kaže tačan odgovor',
-  phSingle:'Ili ukucaj: [[kilo, two, stop]]…',phMulti:'Ukucaj [[KM]] ili [[kilo mike]], pa [[Enter]]',
+  phSingle:'Ili ukucaj znak',phMulti:'Ili ukucaj znakove',
   accuracy:'Tačnost',streak:'Niz',learned:'Naučeno',answers:'Odgovori',
   mastery:'Savladanost',characters:'Znakovi',inRotation:'{a} od {b} u vježbi',drilling:'Najviše se vježba: ',
   settings:'Podešavanja',gExercise:'Vježba',gSending:'Slanje',gAnswering:'Odgovaranje',
@@ -116,9 +116,9 @@ const SR={
   howTo:'Uputstvo',
   guide:'<h3>Osnove</h3><p>Pritisni <b>Start</b>. Aplikacija šalje Morzeov kod, a ti odgovaraš izgovarajući fonetsko ime ([[Kilo, Mike, Two, Stop]]…). Ako nisi primio znak, reci <b>[[next]]</b> (ili [[skip, pass]]) ili dodirni <b>Dalje</b>: računa se kao promašaj, odgovor se pročita naglas i šalje se sljedeći. <b>Ponovi</b> ponovo šalje trenutnu stavku.</p>'+
     '<p>Glasovne komande: <b>[[replay]]</b> (ili [[repeat]]) ponovo šalje stavku, <b>[[pause]]</b> pauzira vježbu, <b>[[continue]]</b> (ili [[resume]]) je nastavlja.</p>'+
-    '<p>Dodirni <b>Uključi mikrofon</b> jednom i ostaje uključen. Umjesto govora možeš i kucati u polje.</p>'+
+    '<p>Dodirni <b>Uključi mikrofon</b> jednom i ostaje uključen. Umjesto govora možeš i ukucati sam znak u polje; polje se prazni nakon svakog odgovora.</p>'+
     '<h3>Tipovi vježbe</h3><ul><li><b>Pojedinačni znakovi</b> — jedan po jedan znak, odgovor je jedna riječ.</li><li><b>Nasumične grupe</b> — nasumične grupe od tvojih znakova.</li><li><b>Riječi</b> — česte engleske riječi.</li><li><b>Pozivni znakovi</b> — realni pozivni znakovi: stvarni [[ITU]] prefiks, cifra područja i sufiks od 1–3 slova, ponekad [[/P]] ili [[/M]].</li></ul>'+
-    '<p>Kod grupa, riječi i pozivnih znakova odgovor speluješ slovo po slovo. Provjera ide kad izgovoriš onoliko znakova koliko je poslato. Reci <b>[[over]]</b> (ili [[done]]) za raniju provjeru, <b>[[correction]]</b> (ili [[back, delete]]) da obrišeš posljednje slovo. Kucanjem: [[KM]] ili [[kilo mike]], pa [[Enter]].</p>'+
+    '<p>Kod grupa, riječi i pozivnih znakova odgovor speluješ slovo po slovo. Provjera ide kad izgovoriš onoliko znakova koliko je poslato. Reci <b>[[over]]</b> (ili [[done]]) za raniju provjeru, <b>[[correction]]</b> (ili [[back, delete]]) da obrišeš posljednje slovo. Kad kucaš, samo ukucaj znakove (npr. [[KM]]): provjera ide kad ukucaš dovoljno, ili pritisni [[Enter]] za raniju provjeru.</p>'+
     '<h3>Kako se prilagođava</h3><p>Svaki znak ima ocjenu savladanosti. Promašaji je spuštaju, tačni odgovori podižu, brzi više od sporih. Slabiji znakovi se biraju češće. U <b>[[Koch]]</b> redoslijedu počinješ sa [[K]] i [[M]]; sljedeći znak se otključava kad svi znakovi u vježbi dostignu nivo <b>Otključaj na</b> (uz bar 4 pokušaja po znaku). Panel <b>Savladanost</b> pokazuje ocjene: crveno slabo, narandžasto napreduje, zeleno sigurno. Podrazumijevano je zatvoren da ne otkriva odgovore. Dodirni znak u njemu da ga čuješ (to pauzira vježbu).</p>'+
     '<h3>Podešavanja</h3><dl>'+
     '<dt>Skup znakova</dt><dd>[[Koch]] redoslijed (postepeno otključavanje), sva slova, slova i brojevi, ili slova, brojevi i interpunkcija (sve odjednom).</dd>'+
