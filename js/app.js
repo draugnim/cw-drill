@@ -1,10 +1,10 @@
-import {MORSE,NATO,LOOKUP,NOPE,CMD,FULL} from './data.js?v=5';
+import {MORSE,NATO,LOOKUP,NOPE,CMD,FULL} from './data.js?v=19';
 import {createPlayer} from './morse.js?v=18';
 import {createBand} from './band.js?v=18';
 import {load,save as store} from './storage.js?v=18';
 import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=17';
-import {createMic,hasWebSpeech,canCapture,GRAMMAR} from './recognizer.js?v=13';
-import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=18';
+import {createMic,hasWebSpeech,canCapture,GRAMMAR} from './recognizer.js?v=19';
+import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=19';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -42,11 +42,11 @@ function next(){
   else{setBig('?','wait',1);$('msg').innerHTML=t('whatWas')}
   mic.setVocab(vocabFor());sendCurrent();render();
 }
-/* offline recogniser: only the characters this item can contain, plus next (and over/correction when spelling) */
+/* offline recogniser: only the characters this item can contain, plus next/replay/pause/continue (and over/correction when spelling) */
 function vocabFor(){
   const all=(cur&&cur.note)||(!cfg.limit&&(cfg.mode==='words'||cfg.mode==='calls'));
   const set=new Set(all?FULL:getProg(cfg).active);
-  return GRAMMAR.filter(w=>{const g=parseTok(w.split(' ')[0]);return g==='NOPE'||(multi()&&(g==='OVER'||g==='BACK'))||set.has(g)});
+  return GRAMMAR.filter(w=>{const g=parseTok(w.split(' ')[0]);return g==='NOPE'||g==='REPLAY'||g==='PAUSE'||g==='RESUME'||(multi()&&(g==='OVER'||g==='BACK'))||set.has(g)});
 }
 function pickVoice(){try{const v=speechSynthesis.getVoices();return v.find(x=>/^en[-_]US/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null}catch(e){return null}}
 function say(text,cb){
@@ -84,7 +84,7 @@ function finish(given,raw){
 }
 /* one spelled token while answering a word or callsign */
 function spellToken(tok){
-  const g=parseTok(tok);if(!g||g==='BAD')return;
+  const g=parseTok(tok);if(!g||g==='BAD'||(g.length>1&&g!=='NOPE'&&g!=='OVER'&&g!=='BACK'))return;
   rawWords.push(tok);
   if(g==='NOPE'){finish('NOPE',rawWords.join(' '));return}
   if(g==='OVER'){if(buf.length)finish(buf.join(''),rawWords.join(' '));return}
@@ -102,6 +102,11 @@ function onPhrase({id,text,alts,final,act,unsure}){
   if(act===false)return;
   if(id!==ph.id)ph={id,n:0};
   const toks=tokens(text);
+  /* drill commands: replay, pause, continue (heard while paused too) */
+  if(!speaking&&performance.now()>=ignoreUntil)for(let i=ph.n;i<toks.length;i++){const g=parseTok(toks[i]);
+    if(g==='PAUSE'&&running){ph.n=toks.length;pause();return}
+    if(g==='RESUME'&&!running){ph.n=toks.length;start();return}
+    if(g==='REPLAY'&&running&&cur&&!busy){ph.n=i+1;sendCurrent();return}}
   if(speaking||performance.now()<ignoreUntil||!running||busy||!cur){ph.n=Math.max(ph.n,toks.length);return}
   if(final){const e=$('err');if(unsure)e.textContent=t('sayAgain');else if(e.textContent===t('sayAgain'))e.textContent=''}
   if(!multi()){
@@ -125,7 +130,7 @@ const mic=createMic({
 /* ---------- typed answers ---------- */
 let proc=0;
 function typedToString(v){let s='';for(const t of tokens(v)){const g=parseTok(t);
-    if(g==='NOPE')return 'NOPE';if(g&&g.length===1){s+=g;continue}
+    if(g==='NOPE')return 'NOPE';if(g&&g.length===1){s+=g;continue}if(g&&g!=='BAD')continue;
     const u=t.toUpperCase();if(/^[A-Z0-9.,?/=]+$/.test(u))s+=u}return s}
 $('ans').addEventListener('input',()=>{$('err').textContent='';if(multi())return;
   const v=$('ans').value;if(v.length<proc)proc=v.length;const tk=tokens(v.slice(proc));

@@ -12,7 +12,8 @@ const NUMW={ZERO:'0',ONE:'1',TWO:'2',THREE:'3',FOUR:'4',FIVE:'5',SIX:'6',SEVEN:'
 
 export const NOPE=new Set(['NOPE','NO','PASS','SKIP','DUNNO','NEXT','NOPES']);
 /* spoken commands while spelling a word or callsign */
-export const CMD={OVER:'OVER',DONE:'OVER',BACK:'BACK',CORRECTION:'BACK',DELETE:'BACK'};
+export const CMD={OVER:'OVER',DONE:'OVER',BACK:'BACK',CORRECTION:'BACK',DELETE:'BACK',
+  REPLAY:'REPLAY',REPEAT:'REPLAY',PAUSE:'PAUSE',CONTINUE:'RESUME',RESUME:'RESUME'};
 
 export const LOOKUP={};
 for(const k in NATO)LOOKUP[NATO[k].toUpperCase().replace(/[^A-Z]/g,'')]=k;

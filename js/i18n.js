@@ -34,8 +34,8 @@ const EN={
   errClosing:'The mic keeps closing. Tap Open mic to try again.',errDisconnected:'The mic was disconnected.',
   errMicUnavailable:'That mic isn’t available. Pick another in Settings → Mic input.',errOffline:'Couldn’t start the offline recogniser ({x}).',
   recChanged:'Recogniser changed. Tap Open mic again.',switchInputs:'Turn the mic off and on again to switch inputs.',
-  noteOffline:'Offline recogniser: listens only for the characters you’re practising, “next”, “over” and “correction”. Unclear words are ignored so you can repeat them. Choose the mic in Settings → Mic input.',
-  noteOfflineChars:'Offline recogniser: listens only for the characters you’re practising and “next”. Unclear words are ignored so you can repeat them. Choose the mic in Settings → Mic input.',
+  noteOffline:'Offline recogniser: listens only for the characters you’re practising and the commands “next”, “replay”, “pause”, “continue”, “over” and “correction”. Unclear words are ignored so you can repeat them. Choose the mic in Settings → Mic input.',
+  noteOfflineChars:'Offline recogniser: listens only for the characters you’re practising and the commands “next”, “replay”, “pause” and “continue”. Unclear words are ignored so you can repeat them. Choose the mic in Settings → Mic input.',
   noteHttps:'The mic needs this page served over https://.',noteNoSpeech:'This browser has no speech service. Switch Settings → Recogniser to Offline.',
   noteBrowser:'Tap <b>Open mic</b> once and keep talking — it reopens by itself after pauses. Headphones help, so the mic doesn’t hear the tone.',
   noteWords:'Not enough words use only your learned characters and length, so this is a random group. Learn more characters, widen the length, or turn off “Only characters in rotation”.',
@@ -46,6 +46,7 @@ const EN={
   language:'Language',toDark:'Switch to dark theme',toLight:'Switch to light theme',
   howTo:'How to use',
   guide:'<h3>Basics</h3><p>Press <b>Start</b>. The app sends Morse; answer by saying the phonetic name (Kilo, Mike, Two, Stop…). If you can’t copy it, say <b>next</b> (or skip, pass) or tap <b>Next</b>: it counts as a miss, the answer is read out and the next one is sent. <b>Replay</b> sends the current item again.</p>'+
+    '<p>Voice commands: <b>replay</b> (or repeat) sends it again, <b>pause</b> pauses the drill, <b>continue</b> (or resume) starts it again.</p>'+
     '<p>Tap <b>Open mic</b> once and it stays open. You can also type in the box instead of speaking.</p>'+
     '<h3>Exercise types</h3><ul><li><b>Single characters</b> — one character at a time, answered with one word.</li><li><b>Random groups</b> — random groups made from your characters.</li><li><b>Words</b> — common English words.</li><li><b>Callsigns</b> — realistic calls: a real ITU prefix, call-area digit and 1–3 letter suffix, sometimes /P or /M.</li></ul>'+
     '<p>For groups, words and callsigns, spell the answer letter by letter. It is checked once you have given as many characters as were sent. Say <b>over</b> (or done) to check early, <b>correction</b> (or back, delete) to remove the last letter. Typing: KM or kilo mike, then Enter.</p>'+
@@ -102,8 +103,8 @@ const SR={
   errClosing:'Mikrofon se stalno zatvara. Dodirni Uključi mikrofon da pokušaš ponovo.',errDisconnected:'Mikrofon je isključen.',
   errMicUnavailable:'Taj mikrofon nije dostupan. Izaberi drugi u Podešavanja → Mikrofon.',errOffline:'Oflajn prepoznavanje nije pokrenuto ({x}).',
   recChanged:'Prepoznavanje je promijenjeno. Ponovo dodirni Uključi mikrofon.',switchInputs:'Isključi i ponovo uključi mikrofon da promijeniš ulaz.',
-  noteOffline:'Oflajn prepoznavanje sluša samo znakove koje vježbaš, „[[next]]“, „[[over]]“ i „[[correction]]“. Nejasne riječi se zanemaruju pa ih možeš ponoviti. Mikrofon biraš u Podešavanja → Mikrofon.',
-  noteOfflineChars:'Oflajn prepoznavanje sluša samo znakove koje vježbaš i „[[next]]“. Nejasne riječi se zanemaruju pa ih možeš ponoviti. Mikrofon biraš u Podešavanja → Mikrofon.',
+  noteOffline:'Oflajn prepoznavanje sluša samo znakove koje vježbaš i komande „[[next]]“, „[[replay]]“, „[[pause]]“, „[[continue]]“, „[[over]]“ i „[[correction]]“. Nejasne riječi se zanemaruju pa ih možeš ponoviti. Mikrofon biraš u Podešavanja → Mikrofon.',
+  noteOfflineChars:'Oflajn prepoznavanje sluša samo znakove koje vježbaš i komande „[[next]]“, „[[replay]]“, „[[pause]]“ i „[[continue]]“. Nejasne riječi se zanemaruju pa ih možeš ponoviti. Mikrofon biraš u Podešavanja → Mikrofon.',
   noteHttps:'Mikrofon radi samo kad je stranica na [[https://]].',noteNoSpeech:'Ovaj pretraživač nema govorni servis. Prebaci Podešavanja → Prepoznavanje na Oflajn.',
   noteBrowser:'Dodirni <b>Uključi mikrofon</b> jednom i samo pričaj — sam se ponovo uključuje nakon pauza. Odgovori su na engleskom ([[Kilo, Mike, Two]]…). Slušalice pomažu da mikrofon ne čuje ton.',
   noteWords:'Nema dovoljno riječi samo od naučenih znakova i zadate dužine, pa je ovo nasumična grupa. Nauči još znakova, proširi dužinu ili isključi „Samo znakovi u vježbi“.',
@@ -114,6 +115,7 @@ const SR={
   language:'Jezik',toDark:'Prebaci na tamnu temu',toLight:'Prebaci na svijetlu temu',
   howTo:'Uputstvo',
   guide:'<h3>Osnove</h3><p>Pritisni <b>Start</b>. Aplikacija šalje Morzeov kod, a ti odgovaraš izgovarajući fonetsko ime ([[Kilo, Mike, Two, Stop]]…). Ako nisi primio znak, reci <b>[[next]]</b> (ili [[skip, pass]]) ili dodirni <b>Dalje</b>: računa se kao promašaj, odgovor se pročita naglas i šalje se sljedeći. <b>Ponovi</b> ponovo šalje trenutnu stavku.</p>'+
+    '<p>Glasovne komande: <b>[[replay]]</b> (ili [[repeat]]) ponovo šalje stavku, <b>[[pause]]</b> pauzira vježbu, <b>[[continue]]</b> (ili [[resume]]) je nastavlja.</p>'+
     '<p>Dodirni <b>Uključi mikrofon</b> jednom i ostaje uključen. Umjesto govora možeš i kucati u polje.</p>'+
     '<h3>Tipovi vježbe</h3><ul><li><b>Pojedinačni znakovi</b> — jedan po jedan znak, odgovor je jedna riječ.</li><li><b>Nasumične grupe</b> — nasumične grupe od tvojih znakova.</li><li><b>Riječi</b> — česte engleske riječi.</li><li><b>Pozivni znakovi</b> — realni pozivni znakovi: stvarni [[ITU]] prefiks, cifra područja i sufiks od 1–3 slova, ponekad [[/P]] ili [[/M]].</li></ul>'+
     '<p>Kod grupa, riječi i pozivnih znakova odgovor speluješ slovo po slovo. Provjera ide kad izgovoriš onoliko znakova koliko je poslato. Reci <b>[[over]]</b> (ili [[done]]) za raniju provjeru, <b>[[correction]]</b> (ili [[back, delete]]) da obrišeš posljednje slovo. Kucanjem: [[KM]] ili [[kilo mike]], pa [[Enter]].</p>'+
