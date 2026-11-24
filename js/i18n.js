@@ -10,7 +10,7 @@ const EN={
   accuracy:'Accuracy',streak:'Streak',learned:'Learned',answers:'Answers',
   mastery:'Mastery',characters:'Characters',inRotation:'{a} of {b} in rotation',drilling:'Drilling most: ',
   settings:'Settings',gExercise:'Exercise',gSending:'Sending',gAnswering:'Answering',
-  type:'Type',mChars:'Single characters',mGroups:'Random groups',mWords:'Words',mCalls:'Callsigns',
+  type:'Type',mChars:'Single characters',mGroups:'Random groups',mWords:'Words',mAbbr:'Abbreviations',mCalls:'Callsigns',
   charset:'Character set',oKoch:'Koch order (starts with K M)',oLetters:'All letters',oAlnum:'Letters and numbers',oFull:'Letters, numbers, punctuation',
   shortest:'Shortest',longest:'Longest',maxSame:'Same char max',learnedOnly:'Learned only',onlyRotation:'Only characters in rotation',
   speed:'Speed',charGap:'Character gap',wordGap:'Word gap',sendTimes:'Send times',repeatPause:'Repeat pause',tone:'Tone',volume:'Volume',
@@ -38,7 +38,7 @@ const EN={
   noteOfflineChars:'Offline recogniser: listens only for the characters you’re practising and the commands “next”, “replay”, “pause” and “continue”. Unclear words are ignored so you can repeat them. Choose the mic in Settings → Mic input.',
   noteHttps:'The mic needs this page served over https://.',noteNoSpeech:'This browser has no speech service. Switch Settings → Recogniser to Offline.',
   noteBrowser:'Tap <b>Open mic</b> once and keep talking — it reopens by itself after pauses. Headphones help, so the mic doesn’t hear the tone.',
-  noteWords:'Not enough words use only your learned characters and length, so this is a random group. Learn more characters, widen the length, or turn off “Only characters in rotation”.',
+  noteWords:'Not enough words or abbreviations use only your learned characters and length, so this is a random group. Learn more characters, widen the length, or turn off “Only characters in rotation”.',
   noteCalls:'Callsigns need letters and at least one digit, so this one uses all characters. Turn off “Only characters in rotation” to hide this note.',
   sayAgain:'Didn’t catch that clearly — say it again.',
   gBand:'Band conditions',noise:'Noise',qsb:'Fading (QSB)',qrn:'Static (QRN)',qrm:'Interference (QRM)',bwLbl:'Receiver filter',bw250:'Narrow CW · 250 Hz',bw500:'CW · 500 Hz',bw2400:'SSB · 2.4 kHz',bandWhen:'Play',bwSend:'While sending',bwAlways:'All the time',
@@ -48,14 +48,14 @@ const EN={
   guide:'<h3>Basics</h3><p>Press <b>Start</b>. The app sends Morse; answer by saying the phonetic name (Kilo, Mike, Two, Stop…). If you can’t copy it, say <b>next</b> (or skip, pass) or tap <b>Next</b>: it counts as a miss, the answer is read out and the next one is sent. <b>Replay</b> sends the current item again.</p>'+
     '<p>Voice commands: <b>replay</b> (or repeat) sends it again, <b>pause</b> pauses the drill, <b>continue</b> (or resume) starts it again.</p>'+
     '<p>Tap <b>Open mic</b> once and it stays open. You can also type the character itself in the box instead of speaking; the box clears after each answer.</p>'+
-    '<h3>Exercise types</h3><ul><li><b>Single characters</b> — one character at a time, answered with one word.</li><li><b>Random groups</b> — random groups made from your characters.</li><li><b>Words</b> — common English words.</li><li><b>Callsigns</b> — realistic calls: a real ITU prefix, call-area digit and 1–3 letter suffix, sometimes /P or /M.</li></ul>'+
-    '<p>For groups, words and callsigns, spell the answer letter by letter. It is checked once you have given as many characters as were sent. Say <b>over</b> (or done) to check early, <b>correction</b> (or back, delete) to remove the last letter. When typing, just type the characters (e.g. KM): it checks once you have typed enough, or press Enter to check early.</p>'+
+    '<h3>Exercise types</h3><ul><li><b>Single characters</b> — one character at a time, answered with one word.</li><li><b>Random groups</b> — random groups made from your characters.</li><li><b>Words</b> — about 2000 of the most common English words.</li><li><b>Abbreviations</b> — CW abbreviations, Q-codes and prosigns used in real QSOs ([[TNX, FB, QTH, 5NN, 73]]…).</li><li><b>Callsigns</b> — realistic calls: a real ITU prefix, call-area digit and 1–3 letter suffix, sometimes /P or /M.</li></ul>'+
+    '<p>For groups, words, abbreviations and callsigns, spell the answer letter by letter. It is checked once you have given as many characters as were sent. Say <b>over</b> (or done) to check early, <b>correction</b> (or back, delete) to remove the last letter. When typing, just type the characters (e.g. KM): it checks once you have typed enough, or press Enter to check early.</p>'+
     '<h3>How it adapts</h3><p>Every character has a mastery score. Misses lower it, correct answers raise it, fast ones more than slow ones. Weak characters are picked more often. In <b>Koch order</b> you start with K and M; the next character unlocks when every character in rotation reaches the <b>Unlock at</b> level (with at least 4 attempts each). The <b>Mastery</b> panel shows the scores: red weak, amber improving, green solid. It is closed by default so it doesn’t give answers away. Tap a character there to hear it (this pauses the drill).</p>'+
     '<h3>Settings</h3><dl>'+
     '<dt>Character set</dt><dd>Koch order (unlocks gradually), all letters, letters and numbers, or letters, numbers and punctuation (all at once).</dd>'+
     '<dt>Shortest / Longest</dt><dd>Length range for groups and words.</dd>'+
     '<dt>Same char max</dt><dd>How many times one character may appear in a group, word or callsign.</dd>'+
-    '<dt>Learned only</dt><dd>Groups, words and callsigns use only characters in rotation. If too few words fit, you get a random group instead.</dd>'+
+    '<dt>Learned only</dt><dd>Groups, words, abbreviations and callsigns use only characters in rotation. If too few words or abbreviations fit, you get a random group instead.</dd>'+
     '<dt>Speed</dt><dd>Character speed in WPM.</dd>'+
     '<dt>Character gap / Word gap</dt><dd>Spacing in dit lengths. Standard is 3 and 7; larger values give more thinking time without slowing the characters themselves (Farnsworth).</dd>'+
     '<dt>Send times / Repeat pause</dt><dd>Send each item several times, with this pause between sendings.</dd>'+
@@ -79,7 +79,7 @@ const SR={
   accuracy:'Tačnost',streak:'Niz',learned:'Naučeno',answers:'Odgovori',
   mastery:'Savladanost',characters:'Znakovi',inRotation:'{a} od {b} u vježbi',drilling:'Najviše se vježba: ',
   settings:'Podešavanja',gExercise:'Vježba',gSending:'Slanje',gAnswering:'Odgovaranje',
-  type:'Tip',mChars:'Pojedinačni znakovi',mGroups:'Nasumične grupe',mWords:'Riječi',mCalls:'Pozivni znakovi',
+  type:'Tip',mChars:'Pojedinačni znakovi',mGroups:'Nasumične grupe',mWords:'Riječi',mAbbr:'Skraćenice',mCalls:'Pozivni znakovi',
   charset:'Skup znakova',oKoch:'[[Koch]] redoslijed (počinje sa [[K M]])',oLetters:'Sva slova',oAlnum:'Slova i brojevi',oFull:'Slova, brojevi, interpunkcija',
   shortest:'Najkraće',longest:'Najduže',maxSame:'Isti znak najviše',learnedOnly:'Samo naučeni',onlyRotation:'Samo znakovi u vježbi',
   speed:'Brzina',charGap:'Razmak znakova',wordGap:'Razmak riječi',sendTimes:'Broj slanja',repeatPause:'Pauza ponavljanja',tone:'Ton',volume:'Jačina',
@@ -107,7 +107,7 @@ const SR={
   noteOfflineChars:'Oflajn prepoznavanje sluša samo znakove koje vježbaš i komande „[[next]]“, „[[replay]]“, „[[pause]]“ i „[[continue]]“. Nejasne riječi se zanemaruju pa ih možeš ponoviti. Mikrofon biraš u Podešavanja → Mikrofon.',
   noteHttps:'Mikrofon radi samo kad je stranica na [[https://]].',noteNoSpeech:'Ovaj pretraživač nema govorni servis. Prebaci Podešavanja → Prepoznavanje na Oflajn.',
   noteBrowser:'Dodirni <b>Uključi mikrofon</b> jednom i samo pričaj — sam se ponovo uključuje nakon pauza. Odgovori su na engleskom ([[Kilo, Mike, Two]]…). Slušalice pomažu da mikrofon ne čuje ton.',
-  noteWords:'Nema dovoljno riječi samo od naučenih znakova i zadate dužine, pa je ovo nasumična grupa. Nauči još znakova, proširi dužinu ili isključi „Samo znakovi u vježbi“.',
+  noteWords:'Nema dovoljno riječi ili skraćenica samo od naučenih znakova i zadate dužine, pa je ovo nasumična grupa. Nauči još znakova, proširi dužinu ili isključi „Samo znakovi u vježbi“.',
   noteCalls:'Pozivnom znaku trebaju slova i bar jedna cifra, pa ovaj koristi sve znakove. Isključi „Samo znakovi u vježbi“ da sakriješ ovu napomenu.',
   sayAgain:'Nije razumljivo — ponovi.',
   gBand:'Uslovi na opsegu',noise:'Šum',qsb:'Feding ([[QSB]])',qrn:'Pucketanje ([[QRN]])',qrm:'Smetnje ([[QRM]])',bwLbl:'Filter prijemnika',bw250:'Uski [[CW · 250 Hz]]',bw500:'[[CW · 500 Hz]]',bw2400:'[[SSB · 2,4 kHz]]',bandWhen:'Pusti',bwSend:'Dok se šalje',bwAlways:'Stalno',
@@ -117,14 +117,14 @@ const SR={
   guide:'<h3>Osnove</h3><p>Pritisni <b>Start</b>. Aplikacija šalje Morzeov kod, a ti odgovaraš izgovarajući fonetsko ime ([[Kilo, Mike, Two, Stop]]…). Ako nisi primio znak, reci <b>[[next]]</b> (ili [[skip, pass]]) ili dodirni <b>Dalje</b>: računa se kao promašaj, odgovor se pročita naglas i šalje se sljedeći. <b>Ponovi</b> ponovo šalje trenutnu stavku.</p>'+
     '<p>Glasovne komande: <b>[[replay]]</b> (ili [[repeat]]) ponovo šalje stavku, <b>[[pause]]</b> pauzira vježbu, <b>[[continue]]</b> (ili [[resume]]) je nastavlja.</p>'+
     '<p>Dodirni <b>Uključi mikrofon</b> jednom i ostaje uključen. Umjesto govora možeš i ukucati sam znak u polje; polje se prazni nakon svakog odgovora.</p>'+
-    '<h3>Tipovi vježbe</h3><ul><li><b>Pojedinačni znakovi</b> — jedan po jedan znak, odgovor je jedna riječ.</li><li><b>Nasumične grupe</b> — nasumične grupe od tvojih znakova.</li><li><b>Riječi</b> — česte engleske riječi.</li><li><b>Pozivni znakovi</b> — realni pozivni znakovi: stvarni [[ITU]] prefiks, cifra područja i sufiks od 1–3 slova, ponekad [[/P]] ili [[/M]].</li></ul>'+
-    '<p>Kod grupa, riječi i pozivnih znakova odgovor speluješ slovo po slovo. Provjera ide kad izgovoriš onoliko znakova koliko je poslato. Reci <b>[[over]]</b> (ili [[done]]) za raniju provjeru, <b>[[correction]]</b> (ili [[back, delete]]) da obrišeš posljednje slovo. Kad kucaš, samo ukucaj znakove (npr. [[KM]]): provjera ide kad ukucaš dovoljno, ili pritisni [[Enter]] za raniju provjeru.</p>'+
+    '<h3>Tipovi vježbe</h3><ul><li><b>Pojedinačni znakovi</b> — jedan po jedan znak, odgovor je jedna riječ.</li><li><b>Nasumične grupe</b> — nasumične grupe od tvojih znakova.</li><li><b>Riječi</b> — oko 2000 najčešćih engleskih riječi.</li><li><b>Skraćenice</b> — [[CW]] skraćenice, Q-kodovi i prosigni iz pravih veza ([[TNX, FB, QTH, 5NN, 73]]…).</li><li><b>Pozivni znakovi</b> — realni pozivni znakovi: stvarni [[ITU]] prefiks, cifra područja i sufiks od 1–3 slova, ponekad [[/P]] ili [[/M]].</li></ul>'+
+    '<p>Kod grupa, riječi, skraćenica i pozivnih znakova odgovor speluješ slovo po slovo. Provjera ide kad izgovoriš onoliko znakova koliko je poslato. Reci <b>[[over]]</b> (ili [[done]]) za raniju provjeru, <b>[[correction]]</b> (ili [[back, delete]]) da obrišeš posljednje slovo. Kad kucaš, samo ukucaj znakove (npr. [[KM]]): provjera ide kad ukucaš dovoljno, ili pritisni [[Enter]] za raniju provjeru.</p>'+
     '<h3>Kako se prilagođava</h3><p>Svaki znak ima ocjenu savladanosti. Promašaji je spuštaju, tačni odgovori podižu, brzi više od sporih. Slabiji znakovi se biraju češće. U <b>[[Koch]]</b> redoslijedu počinješ sa [[K]] i [[M]]; sljedeći znak se otključava kad svi znakovi u vježbi dostignu nivo <b>Otključaj na</b> (uz bar 4 pokušaja po znaku). Panel <b>Savladanost</b> pokazuje ocjene: crveno slabo, narandžasto napreduje, zeleno sigurno. Podrazumijevano je zatvoren da ne otkriva odgovore. Dodirni znak u njemu da ga čuješ (to pauzira vježbu).</p>'+
     '<h3>Podešavanja</h3><dl>'+
     '<dt>Skup znakova</dt><dd>[[Koch]] redoslijed (postepeno otključavanje), sva slova, slova i brojevi, ili slova, brojevi i interpunkcija (sve odjednom).</dd>'+
     '<dt>Najkraće / Najduže</dt><dd>Raspon dužine za grupe i riječi.</dd>'+
     '<dt>Isti znak najviše</dt><dd>Koliko puta se isti znak smije pojaviti u grupi, riječi ili pozivnom znaku.</dd>'+
-    '<dt>Samo naučeni</dt><dd>Grupe, riječi i pozivni znakovi koriste samo znakove u vježbi. Ako nema dovoljno takvih riječi, dobiješ nasumičnu grupu.</dd>'+
+    '<dt>Samo naučeni</dt><dd>Grupe, riječi, skraćenice i pozivni znakovi koriste samo znakove u vježbi. Ako nema dovoljno takvih riječi ili skraćenica, dobiješ nasumičnu grupu.</dd>'+
     '<dt>Brzina</dt><dd>Brzina znakova u [[WPM]].</dd>'+
     '<dt>Razmak znakova / Razmak riječi</dt><dd>Razmak u dužinama tačke. Standard je 3 i 7; veće vrijednosti daju više vremena za razmišljanje bez usporavanja samih znakova ([[Farnsworth]]).</dd>'+
     '<dt>Broj slanja / Pauza ponavljanja</dt><dd>Svaka stavka se šalje više puta, sa ovom pauzom između.</dd>'+

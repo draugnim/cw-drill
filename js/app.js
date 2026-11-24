@@ -1,10 +1,10 @@
-import {MORSE,NATO,LOOKUP,NOPE,CMD,FULL} from './data.js?v=19';
+import {MORSE,NATO,LOOKUP,NOPE,CMD,FULL} from './data.js?v=21';
 import {createPlayer} from './morse.js?v=18';
 import {createBand} from './band.js?v=18';
 import {load,save as store} from './storage.js?v=18';
-import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=17';
+import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=21';
 import {createMic,hasWebSpeech,canCapture,GRAMMAR} from './recognizer.js?v=19';
-import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=20';
+import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=21';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -44,7 +44,7 @@ function next(){
 }
 /* offline recogniser: only the characters this item can contain, plus next/replay/pause/continue (and over/correction when spelling) */
 function vocabFor(){
-  const all=(cur&&cur.note)||(!cfg.limit&&(cfg.mode==='words'||cfg.mode==='calls'));
+  const all=(cur&&cur.note)||(!cfg.limit&&cfg.mode!=='groups');
   const set=new Set(all?FULL:getProg(cfg).active);
   return GRAMMAR.filter(w=>{const g=parseTok(w.split(' ')[0]);return g==='NOPE'||g==='REPLAY'||g==='PAUSE'||g==='RESUME'||(multi()&&(g==='OVER'||g==='BACK'))||set.has(g)});
 }
