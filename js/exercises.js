@@ -1,4 +1,5 @@
-import {KOCH,LET,DIG,FULL,WORDS,PREFIXES,DIGITS} from './data.js?v=5';
+import {KOCH,LET,DIG,FULL,PREFIXES,DIGITS} from './data.js?v=21';
+import {WORDS,ABBR} from './words.js?v=21';
 
 /* ---------- per-character progress ---------- */
 const ALNUM=LET.concat(DIG);
@@ -30,13 +31,20 @@ function group(cfg,p,pool){
     const c=pickWeighted(options,x=>weight(p,x));cnt[c]=(cnt[c]||0)+1;s+=c}
   return {text:s};
 }
-function words(cfg,p,last){
-  const [a,b]=lengthRange(cfg),act=new Set(p.active);
-  const list=[...new Set(WORDS)].filter(w=>w.length>=a&&w.length<=b&&maxRepeat(w)<=Math.max(1,cfg.maxSame)&&(!cfg.limit||[...w].every(c=>act.has(c)))&&w!==last);
-  if(list.length<5){const g=group(cfg,p);g.note='noteWords';return g}
+/* words and abbreviations: filter the list, skip recently sent ones, prefer weak characters */
+const recent={words:[],abbr:[]};
+function fromList(cfg,p,last,src,kind){
+  const [a,b]=lengthRange(cfg),act=new Set(p.active),cap=Math.max(1,cfg.maxSame);
+  const list=[...new Set(src)].filter(w=>w.length>=a&&w.length<=b&&maxRepeat(w)<=cap&&(!cfg.limit||[...w].every(c=>act.has(c)))&&w!==last);
+  if(list.length<8){const g=group(cfg,p);g.note='noteWords';return g}
+  /* don't repeat any of the last few (up to 30, never more than half the pool) */
+  const R=recent[kind],keep=Math.min(30,Math.floor(list.length/2)),skip=new Set(R.slice(-keep));
+  const pool=list.filter(w=>!skip.has(w));
   /* sample a few, keep the one with the most weak characters */
-  const cand=Array.from({length:6},()=>list[Math.floor(Math.random()*list.length)]);
-  return {text:pickWeighted(cand,w=>[...w].reduce((s,c)=>s+weight(p,c),0)/w.length)};
+  const cand=Array.from({length:4},()=>pool[Math.floor(Math.random()*pool.length)]);
+  const w=pickWeighted(cand,w=>[...w].reduce((s,c)=>s+weight(p,c),0)/w.length);
+  R.push(w);if(R.length>40)R.shift();
+  return {text:w};
 }
 function callsign(cfg,p){
   const act=new Set(p.active),lim=cfg.limit;
@@ -59,7 +67,8 @@ export function nextItem(cfg,last){
   const p=getProg(cfg);
   switch(cfg.mode){
     case 'groups':return group(cfg,p);
-    case 'words':return words(cfg,p,last);
+    case 'words':return fromList(cfg,p,last,WORDS,'words');
+    case 'abbr':return fromList(cfg,p,last,ABBR,'abbr');
     case 'calls':return callsign(cfg,p);
     default:return chars(cfg,p,last);
   }
