@@ -1,5 +1,5 @@
 /* Two speech engines with one interface:
-   onPhrase({id, text, alts, final}) — text so far for the current phrase (replaces the last one with the same id)
+   onPhrase({id, text, alts, final, confs}) — text so far (confs: offline per-word confidence 0–1, final results only) for the current phrase (replaces the last one with the same id)
    onState(on, labelKey) · onError(key, params) · onSource(key, params) — keys are looked up in i18n.js */
 
 const VOSK_JS='https://cdn.jsdelivr.net/npm/vosk-browser@0.0.8/dist/vosk.js';
@@ -77,9 +77,10 @@ export function createMic({onPhrase,onState,onError,onSource,audio}){
     phraseId++;
     r.on('partialresult',msg=>{const t=(msg.result&&msg.result.partial)||'';if(t)onPhrase({id:phraseId,text:t,alts:[t],final:false,act:false})});
     r.on('result',msg=>{const res=msg.result||{},ws=res.result||[];let text=res.text||'',unsure=false;
-      if(ws.length){const good=ws.filter(w=>w.word!=='[unk]'&&!(w.conf<MIN_CONF));unsure=good.length<ws.length;text=good.map(w=>w.word).join(' ')}
+      let confs=null;
+      if(ws.length){const good=ws.filter(w=>w.word!=='[unk]'&&!(w.conf<MIN_CONF));unsure=good.length<ws.length;text=good.map(w=>w.word).join(' ');confs=good.map(w=>w.conf)}
       else if(text.includes('[unk]')){unsure=true;text=text.replace(/\[unk\]/g,' ').trim()}
-      if(text||unsure)onPhrase({id:phraseId,text,alts:[text],final:true,unsure});phraseId++});
+      if(text||unsure)onPhrase({id:phraseId,text,alts:[text],final:true,unsure,confs});phraseId++});
     return r;
   }
   function voskStop(){

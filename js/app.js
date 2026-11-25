@@ -3,7 +3,7 @@ import {createPlayer} from './morse.js?v=18';
 import {createBand} from './band.js?v=18';
 import {load,save as store} from './storage.js?v=18';
 import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=21';
-import {createMic,hasWebSpeech,canCapture,GRAMMAR} from './recognizer.js?v=19';
+import {createMic,hasWebSpeech,canCapture,GRAMMAR} from './recognizer.js?v=21';
 import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=21';
 
 const $=id=>document.getElementById(id);
@@ -13,7 +13,7 @@ const band=createBand();band.config(cfg);
 const player=createPlayer($('led'),band);
 setLang(cfg.lang||pickDefault());
 
-let cur=null,last=null,buf=[],rawWords=[],busy=false,running=false,times={firstEnd:0,end:0},timer=null;
+let cur=null,last=null,buf=[],rawWords=[],rawConf=[],busy=false,running=false,times={firstEnd:0,end:0},timer=null;
 let sess={ok:0,n:0,streak:0},speaking=false,ignoreUntil=0;
 const multi=()=>cfg.mode!=='chars';
 
@@ -36,7 +36,7 @@ function schedule(fn,ms){clearTimeout(timer);timer=setTimeout(fn,ms)}
 function sendCurrent(){times=player.play(cur.text,cfg)}
 function next(){
   if(!running)return;
-  cur=nextItem(cfg,last&&last.text);last=cur;buf=[];rawWords=[];busy=false;$('ans').value='';
+  cur=nextItem(cfg,last&&last.text);last=cur;buf=[];rawWords=[];rawConf=[];busy=false;$('ans').value='';
   $('pat').textContent='';setState('stListening');$('itemNote').textContent=cur.note?t(cur.note):'';
   if(multi()){showSlots();$('msg').innerHTML=t('spellIt',{n:cur.text.length})}
   else{setBig('?','wait',1);$('msg').innerHTML=t('whatWas')}
@@ -58,14 +58,14 @@ function say(text,cb){
 function introNew(nc,cb){if(!running)return;setBig(esc(nc),'',1);$('pat').textContent=patOf(nc);player.play(nc,Object.assign({},cfg,{repeats:1}));schedule(cb,2600)}
 
 /* given: the spelled string, or 'NOPE' */
-function finish(given,raw){
+function finish(given,raw,rc){
   if(!running||busy||!cur)return false;
   busy=true;$('err').textContent='';
   const now=performance.now();if(now<times.end)player.stop();
   const target=cur.text,dt=Math.max(0,(now-times.end)/1000),ok=given===target,fast=dt<=cfg.slow;
   score(cfg,target,given,fast);
   sess.n++;if(ok){sess.ok++;sess.streak++}else sess.streak=0;
-  cfg.hist.push({c:target,g:given,ok,slow:ok&&!fast,dt:Math.round(dt*10)/10,raw:String(raw||'').trim().slice(0,60),at:Date.now(),m:cfg.mode});
+  cfg.hist.push({c:target,g:given,ok,slow:ok&&!fast,dt:Math.round(dt*10)/10,raw:String(raw||'').trim().slice(0,60),rc:rc&&rc.some(c=>c!=null)?rc.map(c=>c==null?null:Math.round(c*100)):undefined,at:Date.now(),m:cfg.mode});
   if(cfg.hist.length>100)cfg.hist=cfg.hist.slice(-100);
   if(target.length===1){
     setBig(esc(target),ok?'ok':'bad',1);$('pat').textContent=patOf(target);
@@ -83,21 +83,22 @@ function finish(given,raw){
   return true;
 }
 /* one spelled token while answering a word or callsign */
-function spellToken(tok){
+function spellToken(tok,conf){
   const g=parseTok(tok);if(!g||g==='BAD'||(g.length>1&&g!=='NOPE'&&g!=='OVER'&&g!=='BACK'))return;
-  rawWords.push(tok);
-  if(g==='NOPE'){finish('NOPE',rawWords.join(' '));return}
-  if(g==='OVER'){if(buf.length)finish(buf.join(''),rawWords.join(' '));return}
+  rawWords.push(tok);rawConf.push(conf);
+  const done=given=>finish(given,rawWords.join(' '),rawConf);
+  if(g==='NOPE'){done('NOPE');return}
+  if(g==='OVER'){if(buf.length)done(buf.join(''));return}
   if(g==='BACK'){buf.pop();showSlots();return}
   buf.push(g);showSlots();
-  if(buf.length>=cur.text.length)finish(buf.join(''),rawWords.join(' '));
+  if(buf.length>=cur.text.length)done(buf.join(''));
 }
 
 /* ---------- speech ---------- */
 let ph={id:-1,n:0},micState={on:false,label:''},micSrc={k:'',p:null};
 function micLabel(){$('mic').classList.toggle('on',micState.on);$('micL').textContent=t(micState.label||(micState.on?'micListening':'micOpen'))}
 function micSrcText(){const {k,p}=micSrc;$('micSrc').textContent=!k?'':k==='listeningOn'?t(k,{x:(p&&p.x)||t('defaultMic')}):t(k,p)}
-function onPhrase({id,text,alts,final,act,unsure}){
+function onPhrase({id,text,alts,final,act,unsure,confs}){
   $('live').textContent=text?'“'+text.trim()+'”':'';
   if(act===false)return;
   if(id!==ph.id)ph={id,n:0};
@@ -112,12 +113,12 @@ function onPhrase({id,text,alts,final,act,unsure}){
   if(!multi()){
     if(toks.length<=ph.n)return;
     for(const a of alts){const t=tokens(a).slice(ph.n);
-      for(let i=t.length-1;i>=0;i--){const g=parseTok(t[i]);if(g&&(g.length===1||g==='NOPE')){ph.n=Math.max(toks.length,ph.n+1);finish(g,t.slice(0,i+1).join(' '));return}}}
+      const off=ph.n;for(let i=t.length-1;i>=0;i--){const g=parseTok(t[i]);if(g&&(g.length===1||g==='NOPE')){ph.n=Math.max(toks.length,ph.n+1);finish(g,t.slice(0,i+1).join(' '),confs&&confs.slice(off,off+i+1));return}}}
     return;
   }
   /* spelling: commit settled words; the last word of a partial result may still change */
   const upto=final?toks.length:toks.length-1;
-  for(let i=ph.n;i<upto;i++){ph.n=i+1;spellToken(toks[i]);if(busy){ph.n=toks.length;return}}
+  for(let i=ph.n;i<upto;i++){ph.n=i+1;spellToken(toks[i],confs?confs[i]:null);if(busy){ph.n=toks.length;return}}
 }
 const mic=createMic({
   audio:()=>player.audio(),
@@ -168,13 +169,17 @@ function render(){const p=getProg(cfg),o=sequence(cfg);
 /* tap a character in the mastery grid to hear it (pauses the drill) */
 $('grid').addEventListener('click',e=>{const cell=e.target.closest('.cell');if(!cell)return;const c=cell.dataset.c;if(!MORSE[c])return;
   if(running)pause();player.audio();setBig(esc(c),'',1);$('pat').textContent=patOf(c);player.play(c,Object.assign({},cfg,{repeats:1}))});
+/* recognised words, each with the offline recogniser's confidence (%) when known */
+function rawHtml(x){const w=String(x.raw).split(' ');
+  if(!x.rc||x.rc.length!==w.length)return esc(x.raw);
+  return w.map((s,i)=>x.rc[i]==null?esc(s):`${esc(s)}<sup class="cf${x.rc[i]<80?' lo':''}">${x.rc[i]}</sup>`).join(' ')}
 function renderHist(){const H=cfg.hist||[];
   if(!H.length){$('histBody').innerHTML=`<tr><td colspan="4" class="empty">${t('noAnswers')}</td></tr>`;$('histSum').textContent='';return}
   $('histBody').innerHTML=H.slice().reverse().map(x=>{
     const cls=x.ok?(x.slow?'slow':'ok'):'bad',single=x.c.length===1;
     const sent=single?`${esc(x.c)} <span class="w">${esc(NATO[x.c]||'')}</span>`:esc(x.c);
     const you=x.g==='NOPE'?t('nopeWord'):single?esc(NATO[x.g]||x.g):[...x.g].map((c,i)=>c===x.c[i]?esc(c):`<span class="x">${esc(c)}</span>`).join('');
-    return `<tr class="${cls}"><td class="c">${sent}</td><td>${you}${x.raw?`<span class="raw">“${esc(x.raw)}”</span>`:''}</td><td class="res">${x.ok?(x.slow?t('slowWord'):'✓'):'✗'}</td><td class="r">${x.dt}s</td></tr>`}).join('');
+    return `<tr class="${cls}"><td class="c">${sent}</td><td>${you}${x.raw?`<span class="raw">“${rawHtml(x)}”</span>`:''}</td><td class="res">${x.ok?(x.slow?t('slowWord'):'✓'):'✗'}</td><td class="r">${x.dt}s</td></tr>`}).join('');
   const ok=H.filter(x=>x.ok).length,miss={};
   H.forEach(x=>{if(x.ok)return;[...x.c].forEach((c,i)=>{if(x.g==='NOPE'||x.g[i]!==c)miss[c]=(miss[c]||0)+1})});
   const top=Object.entries(miss).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([c,n])=>c+' ×'+n).join(', ');

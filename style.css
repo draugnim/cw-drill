@@ -76,7 +76,9 @@ kbd{border:1px solid var(--line2);border-radius:4px;padding:0 5px;color:var(--mu
 .hist th{font-weight:500;color:var(--muted);text-align:left;font-size:11px;padding:4px 6px;border-bottom:1px solid var(--line)}
 .hist td{padding:6px;border-bottom:1px solid var(--line);vertical-align:top;overflow:hidden;text-overflow:ellipsis}
 .hist td.c{font-family:var(--mono);font-weight:600}
-.hist .raw{display:block;font-family:var(--mono);font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist .raw{display:block;font-family:var(--mono);font-size:11px;color:var(--dim);overflow-wrap:anywhere}
+.hist .raw .cf{font-size:8px;margin-left:1px;color:var(--green)}
+.hist .raw .cf.lo{color:var(--amber)}
 .hist .r{font-family:var(--mono);text-align:right}
 .hist tr.ok .res{color:var(--green)}.hist tr.slow .res{color:var(--amber)}.hist tr.bad .res{color:var(--red)}
 .hist .sum{font-size:12px;color:var(--muted);margin-top:8px}
