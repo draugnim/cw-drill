@@ -4,7 +4,7 @@ import {createBand} from './band.js?v=18';
 import {load,save as store} from './storage.js?v=18';
 import {sequence,getProg,nextItem,score,maybeUnlock} from './exercises.js?v=21';
 import {createMic,hasWebSpeech,canCapture,GRAMMAR} from './recognizer.js?v=21';
-import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=21';
+import {t,setLang,getLang,pickDefault,applyStatic} from './i18n.js?v=23';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));

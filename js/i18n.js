@@ -66,7 +66,7 @@ const EN={
     '<dt>Unlock at</dt><dd>Mastery needed before Koch adds the next character.</dd>'+
     '<dt>Recogniser</dt><dd><b>Offline</b> (default): downloads a 40 MB model once, then works without internet, listens only for the characters you’re practising, ignores unclear words (so you can repeat them) and lets you choose the mic. <b>Phone’s speech service</b>: the browser’s speech recognition; needs internet and uses the phone’s default mic.</dd>'+
     '<dt>Reset progress</dt><dd>Clears mastery for the current character set.</dd></dl>'+
-    '<h3>History</h3><p>The last 100 answers: what was sent, what you said (with the recognised text), the result and response time, plus the most-missed characters.</p>'+
+    '<h3>History</h3><p>The last 100 answers: what was sent, what you said (with the recognised text), the result and response time, plus the most-missed characters. With the offline recogniser each recognised word shows how sure the recogniser was, in percent (e.g. kilo<sup>97</sup>): green 80 or more, amber below 80. Words below 60 are not accepted; you are asked to say them again.</p>'+
     '<h3>Tips and keys</h3><p>Use headphones so the mic doesn’t hear the tone. Settings and progress are saved in this browser only.<br>Keys (outside the text box): <kbd>Space</kbd> start/pause · <kbd>R</kbd> replay · <kbd>N</kbd> next · <kbd>M</kbd> mic</p>'
 };
 const SR={
@@ -135,7 +135,7 @@ const SR={
     '<dt>Otključaj na</dt><dd>Savladanost potrebna da [[Koch]] doda sljedeći znak.</dd>'+
     '<dt>Prepoznavanje</dt><dd><b>Oflajn</b> (podrazumijevano): jednom preuzme model od [[40 MB]], zatim radi bez interneta, sluša samo znakove koje vježbaš, zanemaruje nejasne riječi (pa ih možeš ponoviti) i dozvoljava izbor mikrofona. <b>Govorni servis telefona</b>: prepoznavanje govora u pretraživaču; traži internet i koristi podrazumijevani mikrofon telefona.</dd>'+
     '<dt>Poništi napredak</dt><dd>Briše savladanost za trenutni skup znakova.</dd></dl>'+
-    '<h3>Istorija</h3><p>Posljednjih 100 odgovora: šta je poslato, šta si rekao (uz prepoznati tekst), rezultat i vrijeme odgovora, te najčešće promašeni znakovi.</p>'+
+    '<h3>Istorija</h3><p>Posljednjih 100 odgovora: šta je poslato, šta si rekao (uz prepoznati tekst), rezultat i vrijeme odgovora, te najčešće promašeni znakovi. Uz oflajn prepoznavanje svaka prepoznata riječ pokazuje koliko je prepoznavanje sigurno, u procentima (npr. [[kilo]]<sup>97</sup>): zeleno 80 i više, narandžasto ispod 80. Riječi ispod 60 se ne prihvataju; traži se da ih ponoviš.</p>'+
     '<h3>Savjeti i tasteri</h3><p>Koristi slušalice da mikrofon ne čuje ton. Podešavanja i napredak se čuvaju samo u ovom pretraživaču.<br>Tasteri (van polja za unos): <kbd>[[Space]]</kbd> start/pauza · <kbd>[[R]]</kbd> ponovi · <kbd>[[N]]</kbd> dalje · <kbd>[[M]]</kbd> mikrofon</p>'
 };
 
